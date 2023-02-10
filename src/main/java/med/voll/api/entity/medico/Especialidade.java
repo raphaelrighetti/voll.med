@@ -1,6 +1,7 @@
-package med.voll.api.dto.medicos;
+package med.voll.api.entity.medico;
 
-public enum EspecialidadeDTO {
+public enum Especialidade {
+
     ORTOPEDIA,
     CARDIOLOGIA,
     GINECOLOGIA,

@@ -1,0 +1,232 @@
+Quando vamos inicializar um projeto Spring, não precisamos necessariamente usar o Spring Initializr, podemos criar um projeto Maven do zero e ir adicionando as dependências manualmente, e fazendo a estrutura necessária do projeto.
+
+============spring-boot-starter-parent============
+
+"parent", quando se trata do pom.xml, é um arquivo pom.xml pai que pode ser herdado. Para fazer essa herança, basta colocarmos as informações do pom.xml que queremos como pai no nosso pom.xml alvo envolta de uma tag 
+
+  <parent>
+    </>
+  </parent>.
+
+No entanto, quando se trata do spring-boot-starter-parent, devemos tratar ele como uma dependência.
+
+============spring-boot-starter============
+
+É a dependência mais básica do Spring Boot, que traz com ela o "core" do Spring Boot.
+
+============spring-boot-maven-plugin============
+
+É um plugin que colocamos na tag de build, e irá servir para fazer o build com todas as dependências corretamente.
+
+============RODAR APLICAÇÃO SPRING BOOT============
+
+A classe principal que vai rodar a nossa aplicação Spring, por convenção, sempre terá o nome do nosso artefato e terminará com Application.
+
+Essa classe é a classe executável, ou seja, temos que ter um método main dentro dela.
+
+Para o Spring saber que aquela é a classe principal da aplicação, devemos marcá-la com a annotation @SpringBootApplication.
+
+No nosso método main devemos executar o método SpringApplication.run(<nome da classe main>.class, args);
+
+============Spring x Spring Boot============
+
+Spring é um framework dividido em módulos, com a ideia de que você só usará os módulos conforme a necessidade do projeto. Ele existe desde 2002, mas na época era preciso criar configurações extensas em XML ou uma classe Java para configurar cada módulo e cada coisa que voce ia utilizar. Foi para combater isso que o Spring Boot nasceu, tornando a tarefa de criar configurações automática e muito mais rápida e de fácil manutenção.
+
+O Spring Boot não vem como uma dependência, mas sim na tag parent, que funciona como uma herança para outro pom.xml.
+
+O Spring Boot inverteu o fluxo de rodar aplicações web Java, fazendo termo o servidor Tomcat na nossa aplicação, e não o contrário, por isso conseguimos rodar a aplicação apenas executando a nossa classe com o método main que chama o método run do SpringApplication.
+
+============Spring Dev Tools============
+
+Funciona como um live-server.
+
+Para utilizarmos no IntelliJ, precisamos marcar a opção "build automatically" e a opção de "allow auto-run mesmo quando a aplicação estiver rodando" no compiler, pois apenas ter a dependência não é o suficiente.
+
+============@RestController============
+
+É a annotation que especifica que nossa classe é um controlador REST.
+
+Precisa ter a annotation @RequestMapping, que passa o caminho inicial da requisição, como "/", por exemplo.
+
+============@GetMapping============
+
+Define que o método no RestController vai ser chamado por requisições GET.
+
+Existem outras anotações no mesmo padrão para os demais métodos HTTP.
+
+============REQUEST BODY============
+
+O corpo da requisição no Spring nada mais é do que um parâmetro do método que vai ser chamado na requisição. Porém, para o Spring entender que aquele parâmetro deve receber o corpo da requisição, precisamos marcá-lo com a annotation @RequestBody.
+
+============CORS Spring============
+
+Para acessarmos nossa API de origens diferentes, precisamos criar uma classe de configuração que irá definir as origens permitidas e os métodos HTTP permitidos a partir dessas origens. A classe deverá ficar mais ou menos assim:
+
+@Configuration
+public class CorsConfiguration implements WebMvcConfigurer {
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+            .allowedOrigins("http://localhost:3000")
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "TRACE", "CONNECT");
+    }
+}
+
+============DTO============
+
+Data Transfer Objects são um padrão de objetos feitos para representar os dados de entrada e saída de requisições na nossa API. Sempre iremos utilizar esse padrão.
+
+Nas versões mais recentes do Java, utilizamos Records para representar esses DTOs.
+
+============RECORDS============
+
+Record é um tipo de classe específico das versões mais recentes do Java, que são classes imutáveis de dados, onde não precisamos criar atributos nem métodos para termos as funções de get e etc.
+
+============ADICIONANDO DEPENDÊNCIAS============
+
+Podemos pegar as dependências diretamente do Spring Initializr indo na aba EXPLORE, que irá mostrar como o pom.xml será gerado, assim podendo copiar exatamente as dependências do jeito certo.
+
+============ Spring Data JPA============
+
+Spring Data JPA é o módulo do Spring que nos permite trabalhar com o JPA para a persistência dos dados, fazendo a conexão com o banco de dados e já usando o Hibernate como ORM.
+
+Assim que adicionamos a dependência no nosso projeto, ele tentará fazer a conexão com o banco de dados, gerando uma falha se não conseguir. Para especificarmos os parâmetros de conexão, temos que mexer no nosso arquivo application.properties, que é onde colocaremos as properties usadas na nossa aplicação.
+
+temos que passar as propriedades de forma específica, o que é meio difícil de decorar no começo, mas vou listar as de conexão com banco aqui:
+
+- spring.datasource.url=<conexão> (usa driver jdbc)
+- spring.datasource.username=<username>
+- spring.datasource.password=<password>
+
+Podemos usar YAML também, o que facilita o uso de informações externas, o que ajuda no caso de querermos ocultar a conexão ao banco, por exemplo.
+
+Algumas annotations do JPA que podemos utilizar:
+
+- @Table(name = <nome da tabela>): especifica a tabela que estará mapeada com a entidade.
+- @Entity(name = <nome>): especifica que a classe é uma entidade JPA, que estará linkada com uma entidade do nosso banco de dados.
+- @Id: especifica que é uma chave de uma entidade (PK, FK)
+- @GeneratedValue(strategy = GenerationType.IDENTITY): é uma annotation que especifica que aquele valor será gerado automaticamente pelo JPA. Passando uma strategy que irá dizer o tipo de geração automáticaque irá ser utilizada. No caso de um @Id, será IDENTITY.
+- @Enumerated(EnumType.STRING): especifica que o atributo será um enum, também passando o tipo do Enum (String, nesse caso).
+- @Embedded: usamos quando temos outra entidade dentro da nossa entidade, mas não queremos fazer um relacionamento, e sim que os atributos da outra entidade apareçam na mesma entidade.
+- @Embeddable: especifica que a classe vai ser usada com @Embedded.
+
+É importante lembrar que, mesmo tendo a annotation @Table na nossa entidade, se a tabela não existir, o JPA não irá criá-la automaticamente, o que irá gerar uma Exception.
+
+Normalmente fazemos o link com o banco de dados usando objetos DAO (Data Access Object), que vem da ideia de separarmos as regras de negócio das regras de acesso ao banco de dados, criando um objeto específico para isso e não deixando isso junto com controllers e etc., mas o Spring facilita isso e fazemos o uso de interfaces (repositories).
+
+Exemplo de uso dos DAOs:
+
+public class ProdutoDao {
+
+    private final EntityManager entityManager;
+
+    public ProdutoDao(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    public void create(Produto produto) {
+        entityManager.persist(produto);
+    }
+
+    public Produto read(Long id) {
+        return entityManager.find(Produto.class, id);
+    }
+
+    public void update(Produto produto) {
+        entityManger.merge(produto);
+    }
+
+    public void remove(Produto produto) {
+        entityManger.remove(produto);
+   }
+
+}
+
+Assim que faríamos a persistência no banco de dados usando apenas o JPA, e não o Spring Data JPA.
+
+Um repositório é uma interface que podemos utilizar nas nossas regras de negócio e lógicas para fazer a persistência dos dados. Agora, inserir lógicas, tratamento de dados, ou acesso direto sem um controller ao nosso repositório é algo que nunca devemos fazer, pois assim como o DAO, os repositórios também servem para fazermos essa divisão, apesar de ficarem mais próximos das lógicas do que os DAOs.
+Também é interessante saber que um repositório pode tratar de um ou mais DAOs, assim podendo utilizar o mesmo repositório para entidades que possuem entidades como atributo.
+
+O padrão Repository incentiva um design orientado a domínio, o que torna mais fácil a compreensão do domínio e da estrutura de dados, além de, no Spring, tornar o nosso código mais fácil e mais legível, a partir do uso das interfaces.
+
+============JpaRepository============
+
+É a interface mãe das interfaces Repository que precisamos criar para ter a persistência dos dados no banco de dados. Sempre criaremos uma interface para cada entidade nossa, usando a convençaõ de passar o nome da entidade com "Repository" no final.
+
+Essas interfaces precisam estender a interface JpaRepository, que irá receber um generics com dois tipos após o "extends", onde o primeiro parâmetro é a entidade e o segundo o tipo do atributo @Id dela.
+
+Só de criar a interface e estender JpaRepository, já temos o nosso repository pronto para ser utilizado, apesar de podemos criar outros métodos e também sobrescrever os existentes.
+
+Para utilizar esse repository, precisamos ter um atributo na nossa classe controller que irá ser uma instância dele. Como não somos nós que fazemos a inicialização desse objeto, precisamos falar pro próprio Spring fazer isso com a annotation @Autowired, que é a annotation responsável por fazer a injeção de dependências no Spring.
+Tendo esse objeto como atributo, podemos usar os métodos disponíveis nele dentro dos nossos métodos responsáveis por tratar as requisições, como, por exemplo, o método save();, responsável por salvar os dados no banco de dados.
+
+Para instanciarmos uma entidade a partir de um DTO, precisamos de um construtor que recebe o DTO e passa os campos dele para a entidade (ou podemos usar o @AllArgsConstructor e passar os dados do DTO para ele no controller, mas isso é um saco).
+
+============LOMBOK============
+
+É uma biblioteca feita para utilizarmos annotations que geram códigos verbosos para nós, como getters e setters, toString e etc.
+
+Algumas annotations:
+
+- @Getter: gera os getters.
+- @NoArgsConstructor: gera o construtor default.
+- @AllArgsConstructor: gera um construtor com todos os atributos.
+- @EqualsAndHashCode(of = <campo(s) usado(s) para fazer o HashCode>): gera o equals(); e o hash();, por padrão usando todos atributos para isso.
+
+============FLYWAY MIGRATIONS============
+
+Ferramentas de Migrations são ferramentas que nos dão o controle do versionamento do nosso banco de dados utilizado na aplicação. O FLYWAY é a ferramenta do Migrations que o Spring dá suporte, e ela servirá para fazermos todas as mudanças na estrutura do banco de dados que precisarmos, como criação de tabelas, modificação, exclusão, etc.
+
+O FLYWAY não é um módulo do Spring, mas o Spring tem integração com ele, deixando mais fácil de utilizá-lo.
+
+As migrations no Spring sempre ficam no diretório:
+
+"src/main/java/resources/db/migration"
+
+São arquivos .sql com scripts feitos por nós do que vai ser feito na migration.
+(normalmente temos que criar o diretório "db/migration")
+
+Sempre que formos mexer em migrations, devemos parar a nossa aplicação.
+
+**MIGRATIONS EXECUTADAS NÃO PODEM SER MODIFICADAS**
+
+Se precisamos fazer uma alteração, devemos criar outro arquivo de migration com um versionamento acima do anterior.
+
+Se acontecer algum erro com a migration, devemos ir no banco de dados e executar o seguinte script:
+
+"delete from flyway_schema_history where success = 0;"
+
+Pode ser que alguma tabela ou atributo sejam criados em uma execução de migration com falha. Nesse caso, podemos apenas deletar o banco de dados e criá-lo novamente, que assim todas as migrations serão executadas do zero.
+
+============PADRÃO NOMENCLATURA .sql FLYWAY============
+
+Nos arquivos .sql do FLYWAY sempre temos que seguir o padrão de nomenclatura:
+
+"V<número versionamento>__<nome descritivo>.sql"
+
+Os scripts sql são executados automaticamente.
+
+Os scripts sql são scripts sql normais, mudando conforme o banco de dados que estamos utilizando.
+
+============@Transactional============
+
+Precisamos dessa annotation em métodos de controladores que irão executar uma transação direta de dados com o nosso banco de dados, seja ela um create, um read, um update ou um delete.
+
+============BEAN VALIDATION============
+
+Bean Validation é uma especificação de validação do Java e o Spring tem um módulo chamado "Validation" que facilita o uso dessa especificação.
+
+Precisamos fazer validações em parâmetros recebidos por requisições à nossa API, ou seja, precisamos fazer essas validações no DTO que irá guardar os dados recebidos no corpo da requisição.
+
+A validação no Spring é feita por meio de annotations, o que torna muito mais fácil e legível fazer essas validações.
+Temos que passar a annotation @Valid no método do controller que está recebendo o corpo da requisição para as verificações serem feitas.
+
+Algumas annotations:
+
+- @NotNull: especifica que o atributo não pode ser null.
+- @NotBlank: especifica que o atributo não pode estar vazio, mesmo que não seja null (também não deixa ser null).
+- @Email: especifica que a String deve estar no formato correto de um email.
+- @Pattern(regexp = <regex>): especifica um padrão que a String deve seguir utilizando regex.
+- @Valid: especifica que um atributo também tem que ser validado, e é usado no caso de termos outro DTO dentro do nosso DTO. Lembrando que temos que ter as validações dos campos no outro DTO também.
+
