@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import med.voll.api.dto.paciente.PacienteDTO;
+import med.voll.api.dto.paciente.PacienteDTOCadastro;
 import med.voll.api.entity.endereco.Endereco;
 
 @Table(name = "paciente")
@@ -26,7 +26,7 @@ public class Paciente {
     @Embedded
     private Endereco endereco;
 
-    public Paciente(PacienteDTO dto) {
+    public Paciente(PacienteDTOCadastro dto) {
         nome = dto.nome();
         email = dto.email();
         cpf = dto.cpf();
