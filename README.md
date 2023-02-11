@@ -25,3 +25,11 @@ Nessa aula vi como persistir os dados recebidos na requisição utilizando repos
 Outro tópico da aula foi fazer a validação dos dados recebidos na requisição utilizando o módulo Validation do Spring, que possui várias annotations que facilitam muito na hora de fazer essas validações.
 
 Além do conteúdo da aula, como no curso estamos utilizando MySQL como banco de dados, resolvi aprender um pouco sobre docker e utilizar o MySQL a partir um container para manter a minha máquina com um bom desempenho.
+
+## Aula 4
+
+### Requisições GET e Paginação
+
+Nessa aula vi como fazer a API responder à requisições GET, retornando os dados aplicando uma paginação com o uso da interface Pageable e os dados em uma Page em vez de uma lista.
+
+Também vi como mudar o jeito que a paginação irá funcionar com o uso de query strings na própria requisição e como mudar o padrão usado pelo Spring com o uso da annotation @PageableDefault.

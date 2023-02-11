@@ -230,3 +230,67 @@ Algumas annotations:
 - @Pattern(regexp = <regex>): especifica um padrão que a String deve seguir utilizando regex.
 - @Valid: especifica que um atributo também tem que ser validado, e é usado no caso de termos outro DTO dentro do nosso DTO. Lembrando que temos que ter as validações dos campos no outro DTO também.
 
+============REQUISIÇÕES GET============
+
+Para darmos respostas à requisições GET, usamos a annotation @GetMapping no nosso controller. Podemos ter outro objeto DTO para devolver como resposta à requisição, devolvendo apenas os dados realmente necessários do nosso objeto que está sendo acessado.
+
+Para pegarmos os registros do nosso banco de dados, podemos usar os métodos de "find" do nosso repository, que irão retornar um ou mais registros da nossa entidade, tendo o tipo do objeto como a classe da entidade.
+Como temos que retornar uma coleção de objetos DTO, apenas usar esses métodos e tentar retornar o retorno deles na nossa resposta não dá certo, pois o tipo dos objetos retornados ainda não foi convertido para a nossa classe DTO. Para fazermos isso, podemos usar stream() e map():
+
+"return repository.findAll().stream().map(MedicoDTOListagem::new).toList();"
+
+Nesse exemplo, o map mapeia cada objeto do fluxo de dados para outro tipo, MedicoDTOListagem, nesse caso, usando o próprio construtor do record DTO como método, que recebe um objeto do tipo Medico, e transforma em uma lista desse tipo a partir da lista que tínhamos. 
+
+Podemos ter construtores em Records, mas é importante lembrar que esses construtores personalizados sempre têm que usar o construtor padrão dos records, que é o construtor que recebe todos os atributos que declaramos na declaração do Record. Chamamos esse construtor da seguinte forma:
+
+"this(<parâmetros recebidos no record...>);"
+
+Sempre é bom usar DTOs, tanto para dados que estão sendo recebidos na API quanto para dados que estão sendo retornados por ela.
+
+============PAGINAÇÃO============
+
+Paginação é dividir o retorno das requisições get em páginas, devolvendo apenas um certo número de objetos por página.
+
+O Spring já possui uma funcionalidade que faz essa paginação para nós, não precisamos implementar na mão. Essa funcionalidade está na interface Pageable, e podemos receber um objeto com esse tipo por parâmetro no nosso método.
+
+Quando recebemos esse objeto, podemos passar ele como parâmetro do método findAll(); do repository, o que fará com que o nosso retorno não possa ser mais uma List, e sim uma Page.
+O método findAll();, quando usado com um Pageable, já tem um método map(); que funciona do mesmo jeito que o map(); de Stream, mas já retornando uma Page que contém os objetos retornados, sem a necessidade de usarmos um método toList();, ou algo do tipo.
+
+@GetMapping
+public Page<MedicoDTOListagem> listar(Pageable pageable) {
+    return repository.findAll(pageable).map(MedicoDTOListagem::new);
+}
+
+Quando utilizamos a paginação do Spring e implementamos nosso código dessa forma, a resposta da requisição virá de forma diferente, tendo os registros dentro de um array "content" e as informações sobre a paginação em um objeto "pageable", o que é útil para o front saber fazer melhor a paginação.
+
+Por padrão, uma Page sempre terá 20 registros nela, mas podemos mudar isso utilizando os parâmetros "size=<número de registros na página>" e "page=<número da página a ser exibida>" como query string na requisição à nossa API. O índice das páginas começa no 0, assim como em listas. O Spring lê essa query string automaticamente.
+
+============ORDENAÇÃO============
+
+Por padrão, os registros sempre virão na mesma ordem em que eles foram inseridos no banco de dados, mas nós podemos mudar essa ordem utilizando recursos do Spring.
+
+Para mudar a ordem dos registros retornados na requisição, basta colocarmos o parâmetro "sort=<atributo utilizado na ordem>,<asc ou desc>" na query string, assim fazendo a ordenação a partir de um atributo da nossa entidade, podendo escolher se queremos na ordem crescente ou decrescente com os parâmetros "asc" ou "desc" após a vírgula (por padrão é asc).
+
+Podemos juntar parâmetros de ordenação e paginação na nossa query string sem problema algum. Exemplo:
+
+"http://localhost:8080/medicos?size=10&page=0&sort=nome,asc"
+
+============@PageableDefault============
+
+Por padrão, o Spring irá usar o size de 20 registros e nenhum sort, mas podemos mudar isso com essa annotaion, usando ela da seguinte forma:
+
+@PageableDefault(size = <int tamanho>, sort = {"<atributos>"})
+
+Sim, podemos ordenar por mais de um atributo, por isso precisamos passar um array com os nomes dos atributos usados na ordenação (em String).
+
+Também podemos mudar a ordem padrão da direção (asc ou desc) usando o parâmetro "direction = Sort.Direction.<ASC ou DESC>".
+
+Se passarmos uma query string especificando esses comportamentos, essa query string irá sobrescrever o padrão especificado por nós.
+
+Podemos mudar o nome dos parâmetros recebidos na query string pelo nosso arquivo "application.properties". Exemplo:
+
+spring.data.web.pageable.page-parameter=pagina
+spring.data.web.pageable.size-parameter=tamanho
+spring.data.web.sort.sort-parameter=ordem
+
+Podemos mostrar o sql gerado pelo Hibernate no console especificando que queremos isso no "application.properties" também.
