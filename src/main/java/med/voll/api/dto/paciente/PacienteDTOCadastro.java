@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import med.voll.api.dto.endereco.EnderecoDTO;
+import med.voll.api.dto.endereco.EnderecoDTOCadastro;
 
 public record PacienteDTOCadastro(
         @NotBlank
@@ -16,6 +16,6 @@ public record PacienteDTOCadastro(
         @NotBlank @Pattern(regexp = "\\d{2}9\\d{8}")
         String telefone,
         @NotNull @Valid
-        EnderecoDTO endereco
+        EnderecoDTOCadastro endereco
 ) {
 }

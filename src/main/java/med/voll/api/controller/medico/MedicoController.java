@@ -1,24 +1,23 @@
 package med.voll.api.controller.medico;
 
-
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import med.voll.api.dto.medico.MedicoDTOAtualizacao;
 import med.voll.api.dto.medico.MedicoDTOCadastro;
+import med.voll.api.dto.medico.MedicoDTODetalhe;
 import med.voll.api.dto.medico.MedicoDTOListagem;
 import med.voll.api.entity.medico.Medico;
 import med.voll.api.repository.medico.MedicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.data.web.SortDefault;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.List;
+import java.net.URI;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/medicos")
@@ -29,26 +28,51 @@ public class MedicoController {
 
     @PostMapping
     @Transactional
-    public void registrar(@RequestBody @Valid MedicoDTOCadastro dados) {
-        repository.save(new Medico(dados));
+    public ResponseEntity<MedicoDTODetalhe> registrar(
+            @RequestBody @Valid MedicoDTOCadastro dados,
+            UriComponentsBuilder uriBuilder
+    ) {
+        Medico medico = new Medico(dados);
+
+        repository.save(medico);
+        URI uri = uriBuilder.path("/medicos/{id}").buildAndExpand(medico.getId()).toUri();
+
+        return ResponseEntity.created(uri).body(new MedicoDTODetalhe(medico));
     }
 
     @GetMapping
-    public Page<MedicoDTOListagem> listar(@PageableDefault(sort = {"nome"}) Pageable pageable) {
-        return repository.findByStatusTrue(pageable);
+    public ResponseEntity<Page<MedicoDTOListagem>> listar(@PageableDefault(sort = {"nome"}) Pageable pageable) {
+        Page<MedicoDTOListagem> page = repository.findByStatusTrue(pageable);
+
+        return ResponseEntity.ok(page);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MedicoDTODetalhe> detalhar(@PathVariable Long id) {
+        Medico medico = repository.getReferenceById(id);
+
+        return ResponseEntity.ok(new MedicoDTODetalhe(medico));
     }
 
     @PutMapping
     @Transactional
-    public void atualizar(@RequestBody @Valid MedicoDTOAtualizacao dados) {
+    public ResponseEntity<MedicoDTODetalhe> atualizar(@RequestBody @Valid MedicoDTOAtualizacao dados) {
         Optional<Medico> medico = repository.findById(dados.id());
-        medico.ifPresent(entity -> entity.atualizarCampos(dados));
+        if (medico.isEmpty()) return ResponseEntity.notFound().build();
+
+        medico.get().atualizarCampos(dados);
+
+        return ResponseEntity.ok(new MedicoDTODetalhe(medico.get()));
     }
 
     @DeleteMapping("/{id}")
     @Transactional
-    public void excluir(@PathVariable Long id) {
+    public ResponseEntity excluir(@PathVariable Long id) {
         Optional<Medico> medico = repository.findById(id);
-        medico.ifPresent(Medico::inativar);
+        if (medico.isEmpty()) return ResponseEntity.notFound().build();
+
+        medico.get().inativar();
+
+        return ResponseEntity.noContent().build();
     }
 }

@@ -330,3 +330,43 @@ Funciona basicamente da mesma forma que um PUT, pois só iremos mudar o campo de
 Se seguirmos o padrão de nomenclatura dos métodos do repository, basta criarmos um método novo na interface e ele já estará disponível para uso com uma lógica pronta checando o valor de algum atributo. Esse padrão é:
 
 "findBy<Atributo><Valor>();" ("findByStatusTrue();", por exemplo)
+
+============RETORNANDO STATUS CODE CORRETO============
+
+Quando um método nosso retorna void, por padrão, o retorno que o Spring dará será um status 200 (ok) e nenhum corpo na resposta. Podemos mudar isso utilizando os métodos estáticos da classe ResponseEntity, que têm nomes descritivos com o tipo do status retornado. Por exemplo:
+
+"return ResponseEntity.ok().build();"
+
+Dessa forma, retornariamos um status 200 (ok).
+
+Podemos definir que o retorno da ResponseEntity terá um corpo. Para isso, usamos Generics, colocando dentro dos sinais de menor e maior o objeto que vai ser o corpo da resposta. Por exemplo:
+
+"ResponseEntity<Page<MedicoDTOListagem>>"
+
+Para realmente retornar essa ResponseEntity contendo um corpo, basta passarmos como parâmetro no método estático que gera a ResponseEntity o objeto que queremos como corpo. Por exemplo:
+
+"return ResponseEntity.ok(<objeto>).build();"
+
+============201 CREATED============
+
+O status code 201 (created) é o status code que deve ser retornado em requisições POST, que cadastraramalgum item no nosso sistema a partir da requisição. Além de retornar o status code 201, temos que retornar o novo registro com as informações cadastradas no corpo da resposta e um header chamado "Location", que irá especificar ao front-end onde aquele recurso está disponível na nossa API.
+
+Para retornarmos um "ResponseEntity created" no Spring, precisamos usar o método:
+
+"ResponseEntity.created(<URI>).body(<objeto>);"
+
+Essa URI recebida como parâmetro no método created(); é a URI que vai ser utilizada no header "Location", e para gerá-la utilizamos a classe UriComponentsBuilder, que recebemos por parâmetro no nosso método. Código de exemplo para gerar a URI a partir da classe UriComponentsBuilder:
+
+"uriBuilder.path("/medicos/{id}").buildAndExpand(medico.getId()).toUri();"
+
+O que esse código faz é montar a URI com o caminho padrão da nossa API, sem termos que especificá-lo no código. Por exemplo, "http://localhost:8080/".
+
+Importante lembrar que devemos gerar a URI após ter salvo o registro no banco de dados, pois se fazemos isso antes, a entidade que pegamos o id ainda não possui o id, já que esse é um valor gerado pela JPA quando salvamos a entidade no banco de dados.
+
+No método body();, passamos um DTO de nossa escolha.
+
+============DETALHAMENTO============
+
+Já temos um CRUD completo na nossa API, mas normalmente isso não é o suficiente. Na maioria dos casos, também precisamos de algum método que detalhe um registro buscando-o por id.
+
+Para fazer isso é bem simples, basta acessarmos o registro desejado por meio do id e retorná-lo usando o nosso DTO de detalhamento. Tudo isso sempre retornando ResponseEntity. 

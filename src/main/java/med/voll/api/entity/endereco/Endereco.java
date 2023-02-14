@@ -4,8 +4,8 @@ import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import med.voll.api.dto.endereco.EnderecoDTO;
 import med.voll.api.dto.endereco.EnderecoDTOAtualizacao;
+import med.voll.api.dto.endereco.EnderecoDTOCadastro;
 
 @Embeddable
 @Getter
@@ -21,7 +21,7 @@ public class Endereco {
     private Integer numero;
     private String complemento;
 
-    public Endereco(EnderecoDTO dto) {
+    public Endereco(EnderecoDTOCadastro dto) {
         logradouro = dto.logradouro();
         bairro = dto.bairro();
         cep = dto.cep();

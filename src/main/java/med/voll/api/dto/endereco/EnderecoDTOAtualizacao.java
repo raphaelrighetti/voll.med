@@ -1,6 +1,5 @@
 package med.voll.api.dto.endereco;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public record EnderecoDTOAtualizacao(

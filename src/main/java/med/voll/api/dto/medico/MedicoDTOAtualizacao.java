@@ -3,7 +3,6 @@ package med.voll.api.dto.medico;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import med.voll.api.dto.endereco.EnderecoDTO;
 import med.voll.api.dto.endereco.EnderecoDTOAtualizacao;
 
 public record MedicoDTOAtualizacao(
