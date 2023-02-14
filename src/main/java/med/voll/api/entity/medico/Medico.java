@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import med.voll.api.dto.medico.MedicoDTOAtualizacao;
 import med.voll.api.dto.medico.MedicoDTOCadastro;
 import med.voll.api.entity.endereco.Endereco;
 
@@ -27,6 +28,7 @@ public class Medico {
     private Especialidade especialidade;
     @Embedded
     private Endereco endereco;
+    private Boolean status = true;
 
     public Medico(MedicoDTOCadastro dto) {
         nome = dto.nome();
@@ -35,5 +37,15 @@ public class Medico {
         crm = dto.crm();
         especialidade = dto.especialidade();
         endereco = new Endereco(dto.endereco());
+    }
+
+    public void atualizarCampos(MedicoDTOAtualizacao dados) {
+        if (dados.nome() != null) nome = dados.nome();
+        if (dados.telefone() != null) telefone = dados.telefone();
+        if (dados.endereco() != null) endereco.atualizarCampos(dados.endereco());
+    }
+
+    public void inativar() {
+        status = false;
     }
 }

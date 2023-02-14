@@ -294,3 +294,39 @@ spring.data.web.pageable.size-parameter=tamanho
 spring.data.web.sort.sort-parameter=ordem
 
 Podemos mostrar o sql gerado pelo Hibernate no console especificando que queremos isso no "application.properties" também.
+
+============REQUISIÇÕES PUT============
+
+É sempre uma boa prática retornar o campo de id dos nossos objetos em requisições GET, pois o front-end utilizará esse campo para mandar requisições PUT, DELETE, etc.
+
+Para modificarmos um registro no nosso banco de dados, temos que modificar a nossa entidade JPA, que pegamos por meio do id, utilizando o método findById(); do repository, por meio de um objeto DTO com os campos que queremos permitir a alteração. Normalmente iremos criar um DTO novo, pois se usarmos um que já tínhamos feito, todas as validações que colocamos serão realizadas, o que não é bom, pois a maioria dos campos não devem ser obrigatórios em uma modificação.
+
+Para a modificação realmente ocorrer, precisamos ter um método na nossa entidade que recebe o DTO de atualização e atualiza os campos com base nos campos passados, fazendo as validações nesse método mesmo. No método que irá responder à requisição PUT, devemos chamar esse método de atualização, sem nem chamar nenhum método do repository, pois só de ter as annotations @PutMapping e @Transactional, o Spring irá entender que se trata de uma atualização e irá atualizar os dados no banco de dados também.
+
+============EXCLUSÃO LÓGICA============
+
+Exclusão lógica é sinalizar no nosso banco de dados e no sistema que um usuário está inativo ao excluí-lo, em vez de realmente excluir o registro dele.
+
+============REQUISIÇÕES DELETE============
+
+Nas requisições DELETE, também utilizaremos o id da nossa entidade a ser deletada, mas não precisamos passar um corpo na requisição para isso, basta usarmos um parâmetro dinâmico na URL, que definimos na própria annotation @DeleteMapping dessa forma: @DeleteMapping("/{parametro}"). Para usarmos esse parâmetro recebido dentro do nosso método que responde às requisições DELETE, temos que receber um parâmetro no método com o mesmo nome que demos ao parâmetro na annotation e passar a annotation @PathVariable nele.
+
+O código irá ficar mais ou menos assim:
+
+@DeleteMapping("/{id}")
+@Transactional
+public void excluir(@PathVariable Long id) {
+    repository.deleteById(id);
+}
+
+Dessa forma excluímos mesmo o registro do banco de dados, o que não é uma exclusão lógica.
+
+============EXCLUSÃO LÓGICA COM DELETE============
+
+Funciona basicamente da mesma forma que um PUT, pois só iremos mudar o campo de status para false (0 no banco de dados).
+
+============FILTRAR LISTAGEM============
+
+Se seguirmos o padrão de nomenclatura dos métodos do repository, basta criarmos um método novo na interface e ele já estará disponível para uso com uma lógica pronta checando o valor de algum atributo. Esse padrão é:
+
+"findBy<Atributo><Valor>();" ("findByStatusTrue();", por exemplo)

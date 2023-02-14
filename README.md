@@ -33,3 +33,19 @@ Além do conteúdo da aula, como no curso estamos utilizando MySQL como banco de
 Nessa aula vi como fazer a API responder à requisições GET, retornando os dados aplicando uma paginação com o uso da interface Pageable e os dados em uma Page em vez de uma lista.
 
 Também vi como mudar o jeito que a paginação irá funcionar com o uso de query strings na própria requisição e como mudar o padrão usado pelo Spring com o uso da annotation @PageableDefault.
+
+## Aula 5
+
+### Requisições PUT e DELETE
+
+Nessa aula vi como fazer a API responder à requisições PUT e DELETE, para assim fazer a atualização e exclusão de registros no banco de dados.
+
+Também aprendi o conceito de exclusão lógica e como implementar isso utilizando o Spring, criando um novo campos "status" na tabela e mapeando-o na entidade.
+
+Além disso, foi mostrado no curso como fazer um método personalizado de listagem aplicando um filtro na interface repository, utilizando apenas o padrão de nomenclatura para o Spring fazer a filtragem automaticamente.
+
+## Conclusão
+
+Estou muito feliz com o aprendizado que tive durante esse curso e com um entendimento muito maior do que o que eu tinha antes no básico do Spring, tendo em vista que já havia utilizado o framework no desenvolvimento de um projeto na empresa onde trabalho, mas não entendia realmente como as coisas que eu estava fazendo funcionavam por baixo dos panos.
+
+Mal posso esperar para começar o próximo curso!
