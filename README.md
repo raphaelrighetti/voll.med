@@ -65,3 +65,9 @@ Nessa aula vi a importância de se retornar os status codes certos nas respostas
 Para realmente aplicar as boas práticas dos status codes e corpos de respostas, aprendi o funcionamento da classe ResponseEntity, que facilita muito nesse quesito.
 
 Também aprendi um pouco mais de como trabalhar com objetos Optional, coisa que não havia tido oportunidade de usar ainda.
+
+### Aula 2
+
+Nessa aula vi como tratar os erros gerados em requisições feitas de maneira não esperada com o uso de uma classe @RestControllerAdvice, utilizando métodos @ExceptionHandler e retornando ResponseEntities que fazem mais sentido e seguem as boas práticas, informando realmente o que deu errado na requisição.
+
+Também vi como podemos mudar o padrão do Spring em lidar com Exceptions causadas nas requisições por meio do arquivo "application.properties", usando propriedades padrões do Spring que podemos pegar na [documentação](https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html).

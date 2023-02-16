@@ -57,21 +57,16 @@ public class MedicoController {
     @PutMapping
     @Transactional
     public ResponseEntity<MedicoDTODetalhe> atualizar(@RequestBody @Valid MedicoDTOAtualizacao dados) {
-        Optional<Medico> medico = repository.findById(dados.id());
-        if (medico.isEmpty()) return ResponseEntity.notFound().build();
+        Medico medico = repository.getReferenceById(dados.id());
+        medico.atualizarCampos(dados);
 
-        medico.get().atualizarCampos(dados);
-
-        return ResponseEntity.ok(new MedicoDTODetalhe(medico.get()));
+        return ResponseEntity.ok(new MedicoDTODetalhe(medico));
     }
 
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity excluir(@PathVariable Long id) {
-        Optional<Medico> medico = repository.findById(id);
-        if (medico.isEmpty()) return ResponseEntity.notFound().build();
-
-        medico.get().inativar();
+        repository.getReferenceById(id).inativar();
 
         return ResponseEntity.noContent().build();
     }

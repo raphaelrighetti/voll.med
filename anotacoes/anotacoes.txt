@@ -370,3 +370,60 @@ No método body();, passamos um DTO de nossa escolha.
 Já temos um CRUD completo na nossa API, mas normalmente isso não é o suficiente. Na maioria dos casos, também precisamos de algum método que detalhe um registro buscando-o por id.
 
 Para fazer isso é bem simples, basta acessarmos o registro desejado por meio do id e retorná-lo usando o nosso DTO de detalhamento. Tudo isso sempre retornando ResponseEntity. 
+
+============ERROS NA API============
+
+Por padrão, o Spring devolve os erros com o stack trace completo do que deu erro no nosso código, juntamente com outras informações, como mensagem do erro, tudo isso em uma resposta com código 500. Isso acontece até nos casos de buscar um registro que não existe no nosso banco de dados por uma requisição de detalhamento.
+
+Isso não é interessante, pois estamos expondo informações desnecessárias sobre o código da nossa API, mas podemos mudar o tratamento de erros do Spring e deixarmos de acordo com a nossa necessidade.
+
+Podemos mudar o padrão com que o Spring lida com as respostas desses erros pelo arquivo application.properties, assim podendo fazê-lo não mandar o stack trace por padrão. Para isso usamos a propriedade:
+
+"server.error.include-stacktrace=never"
+
+Importante lembrar que só isso não é suficiente em todos os casos, pois devemos sempre nos preocupar em devolver o status code correto, sendo que o Spring sempre retornará 500, o que não é o ideal.
+
+É impossível decorar todas as propriedades, por isso sempre podemos consultar a documentação nesse link: "https://docs.spring.io/spring-boot/docs/current/reference/html/application-properties.html", sabendo qual é o tipo de property que queremos.
+
+============TRATANDO ERRO 404============
+
+Da forma que eu fiz, cada método tinha que implementar a lógica de retornar um erro 404 como resposta, mas o Spring tem uma solução pra tratar isso de forma global para todos os métodos que gerarem um tipo específico de Exception.
+
+A solução é criar uma classe com a annotation @RestControllerAdvice, que fará com que o Spring saiba que aquela classe é uma classe que ele tem que carregar e que será utilizada pelos @RestController, e dentro dela colocar métodos com a annotation @ExceptionHandler(EntityNotFoundException.class) contendo a lógica de retorno da resposta no caso de acontecer uma Exception daquele tipo.
+
+Importante lembrar que podemos receber por parâmetro a Exception que estamos tratando no método @ExceptionHandler, assim podendo extrair informações dela.
+
+============TRATANDO ERRO 400============
+
+Por padrão, o Spring envia uma série de informações em erros de bad request, que muitas vezes são desnecessariamente complexas e não tão úteis. Por isso é importante tratarmos as respostas 400, devolvendo apenas as informações corretas sobre o que está errado na requisição do cliente.
+
+Para fazer o tratamento da resposta, criamos outro método @ExceptionHandler, só que dessa vez para tratar a Exception "MethodArgumentNotValidException".
+
+Usamos o método getFieldErrors(); da própria Exception, que retorna uma List<FieldError> (FieldError é uma classe que tem vários getters que nos permitem tirar informações sobre o erro que deu no campo específico), que usamos para converter em um DTO com as informações que queremos passar para o cliente sobre o que está errado nos campos da requisição. Exemplo:
+
+@ExceptionHandler(MethodArgumentNotValidException.class)
+public ResponseEntity tratar400(MethodArgumentNotValidException e) {
+    List<FieldError> erros = e.getFieldErrors();
+    List<CampoInvalidoDTO> camposInvalidos erros.stream().map(CampoInvalidoDTO::new).toList();
+
+    return ResponseEntity.badRequest().body(camposInvalidos);
+}
+
+private record CampoInvalidoDTO(String campo, String mensagem) {
+    public CampoInvalidoDTO(FieldError erro) {
+        this(erro.getField(), erro.getDefaultMessage());
+    }
+}
+
+Se mandarmos na requisição o Header "Accept-Language" com o valor "pt-br", as respostas virão em português. Isso funciona para algumas línguas, mas é um número limitado.
+
+Podemos também mudar as mensagens de erro para cada campo específico quando a requisição não estiver de acordo com a validação.
+
+Para isso, basta colocarmos o parâmetro "message = <mensagem>" nas próprias annotations de validação que colocamos nos DTOs. Também podemos colocar essas mensagens em um arquivo "ValidationMessages.properties" e lê-las usando a sintaxe:
+
+message = "{<nome da propriedade>}".
+
+Exemplo:
+
+@NotBlank(message = "{nome.obrigatorio}")
+String nome;
