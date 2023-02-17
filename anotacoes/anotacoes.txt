@@ -427,3 +427,108 @@ Exemplo:
 
 @NotBlank(message = "{nome.obrigatorio}")
 String nome;
+
+============Spring Security============
+
+É o módulo do Spring feito para trabalharmos com autenticação e autorização, tanto em aplicações web tradicionais, quanto em APIs.
+
+Normalmente em aplicações web tradicionais, temos o modelo Steteful, o que significa que quando um usuário loga na aplicação, ele tem uma sessão que pertence a ele onde são guardadas várias informações específicas dele no servidor, para quando ele voltar continuar de onde ele parou. Quando se trata de uma API REST, ela deve ser Stateless, ou seja, não deve ter estado nenhum. O usuário deve fazer a requisição, se autenticar, se tiver acesso, a requisição fará o que tem que ser feito, e acabou.
+
+O Spring Security é bem flexível e nos deixa  trabalhar desses dois modos, assim como usar diversos métodos nesses modos.
+
+Principais objetivos do Spring Security:
+
+- Autenticação
+- Autorização
+- Proteção contra ataques (CSRF, clickjacking, etc.)
+
+Existem vários modos de lidarmos com autenticação em APIs, mas a mais comum é utilizando tokens. No curso, utilizaremos o JWT (JSON Web Token).
+
+Fluxo de autenticação com JWT no Spring:
+
+- Usuário envia informações de login como requisição para a API;
+- A API checa no banco de dados se existe um usuário com as informações de login passadas, e se a senha bate;
+- Se o usuário realmente existir e estiver tudo de acordo, a API gera e devolve um token JWT, para o client.
+
+Esse token JWT tem que ser guardado pela aplicação client-side, pois ele será o que fará com que o login continue valendo.
+
+Com o token já gerado, o client dispara a requisição com um Header chamado "Authorization", com o valor de Bearer TOKEN_JWT, que irá incluir o token na requisição. Se o token estiver certo e ainda for válido, o Spring processará a requisição normalmente, se não, ele irá bloquear a requisição.
+
+Um problema que podemos ter com o uso do JWT é a expiração do token, que normalmente expira por volta de 10 minutos, o que normalmente faria com que o client tivesse que enviar outra requisição de login quando a expiração ocorresse. Isso não é nada prático e não é uma boa ideia.
+
+Para combater isso existe o "refresh token", que é um token que demora mais para expirar e é gerado um novo a cada requisição feita com autenticação JWT. Ou seja, enquanto o usuário estiver mandando requisições pelo client com token JWT, a API retornará um novo token para cada requisição, que será o token utilizado na próxima requisição feita pelo usuário, assim fazendo com que a expiração demore mais e o usuário só precise fazer a autenticação após um período maior de tempo sem ter feito requisições para a API.
+
+Por padrão, quando adicionamos o Spring Security no nosso projeto, ao iniciar a API ele irá gerar uma senha aleatória para login com o usuário "user" e bloquear qualquer requisição que não esteja logada com essas credenciais. Se tentamos disparar uma requisição pelo navegador sem estarmos logados, somos redirecionados para uma página de login poadrão do Spring Security. Usamos isso apenas para desenvolvimento, pois em produção não faz sentido usar o padrão do Spring Security. Além de que esse modelo funcionaria apenas em aplicações web Stateful, o que não é o caso de uma API REST, onde uma tela de login é responsabilidade exclusiva do front-end.
+
+============APLICANDO AUTENTICAÇÃO============
+
+Para fazermos a autenticação e autorização do jeito que precisamos na nossa API, precisaremos ter uma nova entidade chamada "Usuario", assim como uma nova tabela no banco que irá armazenar esses usuários.
+
+Quando armazenamos senhas dos usuários, não podemos armazenar a senha em si, pois o texto exato da senha ficaria armazenado no banco de dados e alguém mal intencionade poderia facilmente aces´-la e usá-la. Para combater isso, usamos algoritmos de "hashing", que geram Strings muito maiores e de difícil dedução, assim só concedendo o acesso quando o usuário digitar a senha que será convertida exatamente para o hash guardado no banco de dados.
+
+Existem muitos algoritmos de hashing populares e muitos que não são mais considerados seguros, mas o que utilizaremos será o Bcrypt, muito popular hoje em dia.
+
+Para todas as ações que iremos fazer na tabela dos usuários no banco de dados, utilizaremos o repository normalmente. Porém, como estamos trabalhando com o Spring Security, temos que criar uma classe com a annotation @Service e que implementa a interface "UserDetailsService", para assim o Spring Security já ler essa classe automaticamente, sem termos que injetá-la em nenhum lugar, e usá-la para fazer a autenticação corretamente.
+
+Essa classe @Service terá que ter um método:
+
+"loadUserByUsername(String username) throws UsernameNotFoundException"
+
+que é o método por onde acessaremos o repository dos usuários e retornaremos o usuário procurando ele por login (username).
+
+Importante lembrar que podemos usar o padrão de nomenclatura dos repositories para já termos um método que busca automaticamente o usuário pelo atributo de login, sem termos que criar uma lógica na mão para isso. 
+Por exemplo:
+
+"UserDetails findByLogin(String login);"
+
+UserDetails é uma classe do Spring Security que representa os detalhes do usuário.
+
+Precisamos especificar ao Spring Security que queremos que ele trabalhe de forma Stateless, pois o padrão dele é Stateful. Não faremos isso por meio do application.properties, e sim por uma classe de configuração, pois isso não é uma configuraçãozinha básica, iremos mudar bastante coisa.
+
+Para o Spring saber que essa é uma classe de configuração, passamos a annotation @Configuration nela juntamente com a annotation @EnableWebSecurity, que especificará que, além de ser uma classe de configuração, é uma classe de configuração de como o Spring Security irá se comportar.
+
+Essa classe deve ter um método que retorna um objeto do tipo "SecurityFilterChain", que é a interface do Spring Security usada para configurar os processos de autenticação e autorização no Spring Security. Para retornar esse objeto, utilizaremos outro objeto recebido por parâmetro, que dessa vez será do tipo "HttpSecurity", que tem alguns métodos para buildarmos o SecurityFilterChain.
+
+Como o JWT já é uma proteção contra ataques CSRF, precisamos desativar a proteção do Spring Security contra esses ataques que já vem por padrão. Para isso usamos os métodos do HttpSecurity:
+
+".csrf().disable()"
+
+Como queremos que o Spring Security trabalhe de forma Stateles, precisamos passar os métodos:
+
+".sessionManagement().sessionCreationPolicy(
+    SessionCreationPolicy.STATELESS
+)"
+
+Para o Spring conseguir usar esse objeto retornado pelo nosso método, temos que anotar o nosso método com a annotation @Bean, que é a annotation que especificar que aquele retorno é um Bean que pode ser utilizado tanto automaticamente pelo Spring, quanto injetado por nós em alguma classe.
+
+Fazendo tudo isso, desabilitamos o padrão do Spring Security e agora ele não checa mais se o usuário está autenticado e autorizado.
+
+============CONTROLLER DE AUTENTICAÇÃO============
+
+Para o fluxo de autenticação ser realmente aplicado e conseguirmos autenticar por meio de uma requisição, precisamos ter um controller que vai ser o responsável por tratar essa requisição e fazer a autenticação do usuário.
+
+Nesse controller, precisaremos chamar o nosso service responsável por fazer a autenticação, mas não podemos fazer isso diretamente. Quem chamará esse service será outra classe que injetamos no nosso controller, a classe AuthenticationManager.
+
+Nesse objeto AuthenticationManager, usaremos o método "authenticate(<token>);", que retornará um objeto do tipo Authentication, que precisamos guardar em uma referência.
+
+Ainda não temos esse token que o método espera como parâmetro, ou seja, precisamos gerá-lo. Para isso utilizaremos um objeto:
+
+"new UsernamePasswordAuthenticationToken(<login>, <senha>);"
+
+que será o nosso token gerado a partir dos atributos passados na requisição, recebidos no Spring como um DTO.
+
+Com o token gerado, passamos ele para o método authenticate();
+
+Tem um detalhe importante, por padrão o Spring não saberá injetar automaticamente o objeto AuthenticationManager, o que gera um erro ao iniciar a aplicação. Para o Spring injetar automaticamente esse objeto com a annotation @Autowired, temos que mudar as configurações do Spring. Como isso é uma configuração de segurança que precisamos modificar, faremos isso na classe de configuração de segurança que já criamos no projeto.
+
+Na classe de configurações de segurança precisamos de outro método, agora um que irá retornar um @Bean do tipo AuthenticationManager. Para gerarmos esse @Bean e retornarmos ele com o nosso método, precisamos receber um objeto do tipo AuthenticationConfiguration como parâmetro no nosso método. Tendo o objeto, basta retornarmos o retorno do método getAuthenticationManager(); que teremos como injetar o AuthenticationManager no nosso controller por meio do @Autowired.
+
+Além disso, temos que especificar para o Spring o tipo de algoritmo de hashing que estamos utilizando, que é BCrypt, no caso, pois, por padrão, ele não irá saber qual algoritmo usar quando chamamos os métodos de gerar token e autenticar. Criaremos um método na nossa classe de configuração de segurança que irá retornar um @Bean do tipo "PasswordEncoder" e irá retornar um "new BCryptPasswordEncoder();.
+
+Ainda temos que implementar a interface UserDetails na nossa entidade Usuario, pois só assim o Spring saberá quais atributos da entidade são o login e senha. Essa interface nos fará implementar vários métodos que irão retornar informações que especificam uma série de coisas sobre o usuário. O que interessa para nós são os métodos getter "getUsername();" e "getPassword();".
+
+Um método importante também é o "getAuthorities();", que precisa retornar uma "Collection<? extends GrantedAuthority>", que é uma coleção contendo as permissões do usuário representado na entidade. Como no projeto só temos uma única permissão geral, iremos apenas colocar como padrão:
+
+"return List.of(new SimpleGrantedAuthority("ROLE_USER"));"
+
+O padrão de nomenclatura dos acessos é começar com "ROLE_" e terminar com o nome da role em letra maiúscula.
