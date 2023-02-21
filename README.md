@@ -91,3 +91,21 @@ Aprendi todo o fluxo de autenticação de um usuário na API com o Spring Securi
 Nessa aula vi como utilizar a biblioteca "java-jwt" da Auth0 para gerar os tokens JWT após a autenticação do usuário e entendi um pouco mais de como os tokens JWT funcionam.
 
 Também aprendi como utilizar variáveis de ambiente em propriedades do arquivo application.properties e como injetar propriedades que não são padrão do Spring utilizando a annotation @Value.
+
+### Aula 5
+
+#### Autorização utilizando os tokens
+
+Nessa aula vi como fazer a autorização de usuários na API validando o token JWT por meio de um Filter que filtra a requisição antes mesmo de ela chegar no controller.
+
+Também aprendi que não basta fazermos a autorização por meio do token enviado no Header da requisição, só com isso o Spring não considera o usuário autenticado e autorizado. Para o Spring realmente fazer a autenticação/autorização, precisamos especificar na nossa classe de configurações de segurança como o Spring Security deve se comportar na autenticação em cada requisição, já que ele está no modo Stateless e não mantém uma sessão do usuário logado.
+
+Também aprendi como forçar o Spring Security a autorizar um usuário após a verificação do token JWT, tendo em vista que se não forçamos ele a fazer isso e não modificamos a ordem dos filtros, ele nunca irá autorizar nenhum usuário, mesmo ele tendo enviado um token válido no Header da requisição.
+
+Foi uma aula com muito conteúdo e nem tudo está fixado na minha cabeça ainda, por isso estou praticando bastante e vou voltar nessa aula posteriormente, pois sei que é um assunto de extrema importância e um tanto complexo quando ainda não estamos acostumados com como funciona.
+
+### Conclusão
+
+Nesse curso aprendi muita coisa interessante e importante, desde como ter respostas personalizadas na API tratando as Exceptions causadas pelas requisições, até como fazer uma autenticação e autorização completa de usuários na API seguindo o modelo Stateless, entre muitos outros detalhes de como tudo funciona.
+
+Sem dúvida foi o curso mais complexo de Spring que finalizei até agora e me sinto muito mais preparado para continuar estudando e melhorando cada vez mais.

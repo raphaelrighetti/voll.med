@@ -587,3 +587,99 @@ Se o Spring não encontrar essa variável de ambiente no nosso computador, ele i
 Para lermos propriedades nossas que colocamos no application.properties precisamos utilizar a annotation @Value("${<nome da propriedade>}") no atributo que queremos atribuir o valor da propriedade.
 
 Com todos esses passos seguidos, temos a nossa autenticação já gerando o token e tudo mais, mas ainda não estamos fazendo nenhuma autorização, ou seja, mesmo sem fazer a autenticação ainda conseguimos disparar qualquer requisição que quisermos.
+
+============AUTORIZAÇÃO============
+
+Para aplicarmos a autorização, precisamos verificar se a requisição tem um token válido antes mesmo de ela chegar no controller, pois se fôssemos tratar isso no controller, isso ia gerar muita repetição de código.
+
+Para isso, precisamos de um interceptador, alguma coisa que vai receber a requisição antes de passá-la para o controller. Um filter faz exatamente isso e é o que iremos usar.
+
+Filters não são exclusividade do Spring, se estivéssemos desenvolvendo um projeto Java EE, muito provavelmente também usariamos algo assim.
+
+============DispatcherServlet============
+
+É a classe do Spring MVC que controla todas as requisições e manda elas para os controllers posteriormente.
+
+============HandlerInterceptor============
+
+É a classe do Spring MVC responsável por interceptar as requisições mandadas do DispatcherServlet para o controller. As requisições sempre passam pelo HandlerInterceptor.
+
+============Filter || HandlerInterceptor============
+
+A diferença entre esses dois é que o Filter é uma especificação dos próprios Servlets, enquanto o HandlerInterceptor é uma classe do Spring mesmo.
+
+Enquanto um Filter irá filtrar a requisição antes mesmo de o Spring ler ela, o HandlerInterceptor irá lê-la somente após ela ter passado pelo DispatcherServlet, o que faz com que a gente consiga ter várias informações que o Spring passa para a gente, como o controller responsável por responder àquela requisição e etc.
+
+Podemos usar tanto um quanto o outro para fazer a autenticação, os dois vão cumprir o mesmo papel nesse caso.
+
+Filter sempre chama o próximo Filter até não tiver mais Filters e a requisição chegar no controller.
+
+============APLICANDO FILTER============
+
+Apesar de que iremos usar Filter no curso, iremos usar um filter específico do Spring, que nos dá muitas facilidades para implementá-lo. Em vez de implementar a interface Filter, iremos estender a classe OncePerRequestFilter, que é uma classe Filter do Spring que implementa a interface Filter e é executado apenas uma vez por request. Precisamos sobrescrever o método "doFilterInternal(<args>);", que é o método que irá aplicar realmente o filtro.
+
+Como queremos que o Spring carregue a nossa classe Filter automaticamente, precisamos marcar ela com a annotation @Component, que diz para o Spring que aquela classe é um componente genérico que precisa ser carregado por ele.
+
+============doFilterInternal(<args>);============
+
+É o método que irá aplicar o nosso filtro. Parâmetros que ele recebe:
+
+- HttpServletRequest request: a requisição que está sendo filtrada.
+- HttpServletResponse response: a resposta do Servlet à nossa requisição.
+- FilterChain filterChain: a cadeia de filtros existentes. Se existirem mais filtros, ele passa para o próximo, se não, vai para o controller. Para isso acontecer, precisamos chamar o método "doFilter();" do FilterChain passando o request e o response como parâmetro.
+
+Apenas seguindo estes passos o nosso filtro já está funcionando, mas ainda temos que fazer a lógica de checar o token e passar ou não na autorização.
+
+============RECUPERANDO O TOKEN============
+
+Precisamos validar o token, ou seja, ver se ele realmente foi gerado pela nossa API e etc.
+
+O token não deve ir no corpo da requisição, e sim no Header "Authorization", que é o Header específico para mandarmos a informação de autorização, no nosso caso o JWT. Normalmente colocamos o nosso token após o prefixo "Bearer", por questões de boa prática e para evitar erros.
+
+Para pegarmos esse Header no nosso Filter, basta utilizarmos o método "getHeader(<nome do Header>);" do nosso HttpServletRequest. Se ele não tiver sido enviado, vai ficar como nulo. Nesse caso podemos jogar uma RuntimeException com uma mensagem personalizada e devolver um DTO com essa mensagem a partir de um método @ExceptionHandler.
+
+Assim já temos o token enviado no Header da requisição, mas ainda não temos a lógica de validar esse token.
+
+============VALIDANDO TOKEN============
+
+Faremos a validação na própria classe @Service responsável por gerar o nosso JWT.
+
+Na própria documentação da biblioteca utilizada temos um exemplo de como fazer isso, e é muito parecido com a forma que geramos o JWT.
+
+Utilizamos o método "JWT.require(<Algorithm>)" seguido de métodos que irão "buildar" a nossa verificação. Após esses métodos, utilizamos o método "verify(<token>)" com o token que veio na requisição. Se o token for válido, podemos cahamr outros métodos, como o "getSubject();", que irá retornar o usuário dono daquela chave.
+
+Precisamos de um Algorithm com a mesma senha do que utilizamos para gerar o JWT.
+
+Tudo isso deve estar dentro de um try/catch, pois se a verificação falhar será gerada uma JWTVerificationException.
+
+Dessa forma nós já estamos validando se o usuário tem a autorização de fazer aquela requisição, mas ainda não especificamos isso para o Spring, ou seja, por mais que o token seja enviado e a requisião passe, o usuário não está sendo autenticado novamente, pois a nossa API é Stateless. Temos que especificar essa autenticação para o Spring.
+
+============AUTENTICANDO USUÁRIO============
+
+Para fazer essa autenticação, precisaremos mudar a nossa classe @Configuration que cuida de como o Spring Security se comporta.
+
+Utilizaremos o método "authorizeHttpRequests()" para dizer que as requisições precisam de uma autorização e autenticação juntamente com o método "requestMatchers(HttpMethod.<método>, <path pattern>).permitAll()" para dizer ao Spring para ignorar a autenticação/autorização em caminhos específicos com métodos HTTP específicos nas requisições. Podemos também utilizar os métodos "anyRequest().authenticated()" para dizermos que qualquer outra requisição além da que marcamos para permitir sem autorização necessite ser validada a autorização.
+
+Importante lembrar que temos vários métodos que podemos encadear, como o "hasRole(<String role>)", que só vai autorizar aquela requisição para um usuário que tiver a role especificada no parâmetro. Também podemos fazer isso usando o MethodSecurity, por meio da annotation @Secured("<Role>") nos próprios métodos que queremos que só quem tenha uma role específica possa acessar. Bom lembrar que para habilitar o MethodSecurity, precisamos especificar isso na nossa SecurityConfiguration com a annotation @EnableMethodSecurity(securedEnabled = true).
+
+Assim especificamos ao Spring que o usuário tem que estar autorizado para fazer várias requisições, mas mesmo mandando o token e estando autorizado isso não irá funcionar, pois ainda não falamos para o Spring que ele deve fazer essa autorização nas requisições.
+
+Para fazer isso, no nosso Filter precisamos usar a classe SecurityContextHolder, que é uma classe do Spring que nos dá possibilidade de forçarmos algumas coisas do nosso contexto de segurança, como forçar que o usuário está autenticado. Exemplo de uso:
+
+"SecurityContextHolder.getContext().setAuthentication(<Authentication>);"
+
+Como visto no exemplo acima, temos que passar um objeto Authentication como parâmetro para o último método. Podemos criar um objeto desse tipo utilizando o construtor da classe UsernamePasswordAuthenticationToken, que recebe 3 parâmetros:
+
+- principal: o objeto a ser autenticado, no nosso caso o usuário.
+- credentials: as credenciais. Se estivemos passando o objeto em si a ser autenticado, podemos passar esse parâmetro como null.
+- authorities: aquela lista de autoridades do usuário.
+
+Assim temos o nosso objeto Authentication que podemos passar para o método "setAuthentication();", agora forçando o Spring a fazer a autenticação se estiver tudo correto.
+
+Só que mesmo fazendo isso ainda não funciona, ele continua dando 403 para tudo. Isso acontece pois o filtro do próprio Spring é chamado antes do nosso, ou seja, o Filter do Spring vê que não estamos logados e devolve 403 direto, nem chega no nosso Filter. Para mudar isso precisamos mudar a ordem dos filtros.
+
+Para mudar a ordem dos filtros, basta colocarmos mais um método no nosso método que retorna o SecurityFilterChain, que é o:
+
+"addFilterBefore(<Filter atrás>, <Filter na frente>)"
+
+Precisamos passar como primeiro parâmetro o nosso filtro (precisamos de uma instância dele, por isso devemos usar a injeção de dependências) e como segundo parâmetro o filtro que o Spring usa automaticamente, que é o UsernamePasswordAuthenticationFilter, assim fazendo com que o nosso filtro seja executado antes dele.

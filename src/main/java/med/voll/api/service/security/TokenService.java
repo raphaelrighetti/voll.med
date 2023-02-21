@@ -3,6 +3,7 @@ package med.voll.api.service.security;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import med.voll.api.entity.usuario.Usuario;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -13,11 +14,11 @@ import java.time.*;
 public class TokenService {
 
     @Value("${jwt.password}")
-    private String password;
+    private String secret;
 
     public String gerarToken(Usuario usuario) {
         try {
-            Algorithm algorithm = Algorithm.HMAC256("abc@1234");
+            Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.create()
                     .withIssuer("Voll.med API")
                     .withSubject(usuario.getLogin())
@@ -28,7 +29,20 @@ public class TokenService {
         }
     }
 
+    public String getSubject(String tokenJWT) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            return JWT.require(algorithm)
+                    .withIssuer("Voll.med API")
+                    .build()
+                    .verify(tokenJWT)
+                    .getSubject();
+        } catch (JWTVerificationException e) {
+            throw new RuntimeException("Token JWT inválido ou expirado");
+        }
+    }
+
     private Instant getExpiracao() {
-        return LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.of("-03:00"));
+        return LocalDateTime.now().plusHours(1).toInstant(ZoneOffset.of("-03:00"));
     }
 }
