@@ -83,3 +83,11 @@ Também vi como podemos mudar o padrão do Spring em lidar com Exceptions causad
 Nessa aula vi como utilizar o Spring Security para fazer a autenticação e autorização dos usuários na nossa API.
 
 Aprendi todo o fluxo de autenticação de um usuário na API com o Spring Security, o conceito de Stateless usando JWT e como ajustar o comportamento do módulo usando uma classe de configuração que disponibiliza objetos @Bean para o Spring usar automaticamente em situações específicas, ou manualmente por meio da injeção de dependência usando a annotation @Autowired.
+
+### Aula 4
+
+#### Geração de tokens JWT
+
+Nessa aula vi como utilizar a biblioteca "java-jwt" da Auth0 para gerar os tokens JWT após a autenticação do usuário e entendi um pouco mais de como os tokens JWT funcionam.
+
+Também aprendi como utilizar variáveis de ambiente em propriedades do arquivo application.properties e como injetar propriedades que não são padrão do Spring utilizando a annotation @Value.

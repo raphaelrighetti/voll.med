@@ -532,3 +532,58 @@ Um método importante também é o "getAuthorities();", que precisa retornar uma
 "return List.of(new SimpleGrantedAuthority("ROLE_USER"));"
 
 O padrão de nomenclatura dos acessos é começar com "ROLE_" e terminar com o nome da role em letra maiúscula.
+
+============GERANDO TOKEN JWT============
+
+Para gerar o token JWT e devolvê-lo na resposta, precisamos usar alguma biblioteca que gera o token de forma correta. No caso, iremos utilizar uma biblioteca que não é um módulo do Spring, e sim uma biblioteca avulsa que serve para gerar os tokens. (Importante lembrar que mesmo não sendo um módulo do Spring, nada nos impede de fazermos a nossa classe geradora de tokens se tornar um @Service que podemos usar na injeção de dependências no nosso controller.)
+
+Entrando no jwt.io, temos uma lista com várias bibliotecas que geram tokens JWT. No curso iremos usar a Auth0.
+
+Para gerarmos o token, precisamos criar uma instância da classe Algorithm, que representará o algoritmo utilizado para gerar o token. No curso utilizaremos o HMAC256, que é um algoritmo mais simples que funciona a partir de uma senha que passamos por parâmetro no método:
+
+"Algorihtm algorithm = Algorithm.HMAC256(<senha>);"
+
+Dessa forma temos o algoritmo que vai ser utillizado na hora de gerar o token, mas ainda não temos o token. Para realmente gerar o token, precisamos usar o método "JWT.create();", que pode ser continuado com vários métodos que nos fazem poder especificar quem gerou o token, normalmente passando o nome da nossa API, e o algoritmo usado para assinalar o token, por exemplo.
+
+Alguns métodos de exemplo:
+
+- withIssuer(<String>): especifica quem gerou o token.
+- withSubject(<identificador do usuário>): especifica qual usuário é dono do token gerado.
+- withClaim(<chave>, <valor>): serve para colocar informações no nosso token por meio de chave-valor.
+- withExpiresAt(<Date || Instant>): especifica até quando o token vai ser válido.
+- sign(<Algorithm>): especifica o algoritmo a ser utilizado para assinalar o token.
+
+Importante lembrar que a referência Authentication que temos no controller de autenticação possui um método "getPrincipal();", que retorna um Object que é o usuário que chamou a autenticação, podemos fazer um type casting com ele para transformá-lo em usuário e usá-lo para ser o dono do token.
+
+Código exemplo:
+
+    public String gerarToken(Usuario usuario) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256("abc@1234");
+            return JWT.create()
+                    .withIssuer("Voll.med API")
+                    .withSubject(usuario.getLogin())
+                    .withExpiresAt(getExpiracao())
+                    .sign(algorithm);
+        } catch (JWTCreationException e) {
+            throw new RuntimeException("Falha ao gerar o token JWT");
+        }
+    }
+
+    private Instant getExpiracao() {
+        return LocalDateTime.now().plusMinutes(10).toInstant(ZoneOffset.of("-03:00"));
+    }
+
+No nosso controller devemos criar um DTO com apenas um campo, que será  o do token. Temos que fazer isso para seguir o padrão de retornar um JSON nas nossas respostas, assim seguindo o padrão que estabelecemos e as boas práticas.
+
+também devemos ocultar a senha utilizada no HMAC256. Para isso podemos criar uma propriedade nossa (sem seguir as padrões do Spring) no arquivo application.properties, utilizando uma variável de ambiente para ler a senha pelo arquivo. Exemplo:
+
+"jwt.token.password=${JWT_PASSWORD:<padrão>}"
+
+Se o Spring não encontrar essa variável de ambiente no nosso computador, ele irá usar o que passarmos depois do ":" como padrão. Assim não precisamos nos preocupar em criar essa variável de ambiente na nossa máquina local.
+
+É essa sintaxe que usamos para ler variáveis de ambiente no application.properties.
+
+Para lermos propriedades nossas que colocamos no application.properties precisamos utilizar a annotation @Value("${<nome da propriedade>}") no atributo que queremos atribuir o valor da propriedade.
+
+Com todos esses passos seguidos, temos a nossa autenticação já gerando o token e tudo mais, mas ainda não estamos fazendo nenhuma autorização, ou seja, mesmo sem fazer a autenticação ainda conseguimos disparar qualquer requisição que quisermos.
