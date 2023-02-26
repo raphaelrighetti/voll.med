@@ -683,3 +683,32 @@ Para mudar a ordem dos filtros, basta colocarmos mais um método no nosso métod
 "addFilterBefore(<Filter atrás>, <Filter na frente>)"
 
 Precisamos passar como primeiro parâmetro o nosso filtro (precisamos de uma instância dele, por isso devemos usar a injeção de dependências) e como segundo parâmetro o filtro que o Spring usa automaticamente, que é o UsernamePasswordAuthenticationFilter, assim fazendo com que o nosso filtro seja executado antes dele.
+
+============DATAS NA REQUISIÇÃO============
+
+Quando vamos receber datas na requisição, que irá ser colocada em um campo do tipo LocalDateTime no nosso DTO, precisamos receber uma String que representa uma data no formato correto que o Spring entende.
+
+Esse formato é:
+
+"<AAAA-MM-DD>T<HH:mm:SS>"
+
+Por exemplo:
+
+"2023-02-27T10:00"
+
+Perceba que os segundos são opcionais, assim como o tempo que vem após o "T".
+
+Importante saber que podemos validar no nosso DTO se a data recebida na requisição é uma data no futuro, o que é muito útil.
+
+Para isso, basta colocarmos a annotation @Future do Spring Validation no nosso campo que estará a data.
+
+============RELACIONAMENTOS EM ENTITIES============
+
+O Spring Data JPA e o JPA em si nos fornecem diversas annotations para trabalharmos com nossas entidades. Entre elas temos as annotations que nos permitem trabalhar com relacionamentos entre as nossas entidades.
+
+Não irei entrar em detalhes sobre cada uma delas, mas é importante lembrar que:
+
+- Todas elas vêm por padrão com o FetchType.LAZY, exceto as @ManyToOne e @OneToOne;
+- A primeira palavra de todas elas sempre se refere à entidade na qual estamos estabelecendo o relacionamento, isto é, se utilizamos a annotation @ManyToOne, estamos dizendo ao Spring que uma instância da nossa entidade terá apenas uma instância da entidade em questão, já essa instância da outra entidade poderá ter várias instâncias da nossa entidade com relacionamento com ela.
+
+Importante saber que o FetchType especifica se os relacionamentos serão carregados mesmo sem o uso deles ou não, onde com o FetchType.LAZY não serão e com o FetchType.EAGER serão.

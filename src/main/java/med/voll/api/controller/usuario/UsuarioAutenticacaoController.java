@@ -1,4 +1,4 @@
-package med.voll.api.controller.autenticacao;
+package med.voll.api.controller.usuario;
 
 import jakarta.validation.Valid;
 import med.voll.api.dto.usuario.UsuarioDTOAutenticacao;
@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/login")
-public class AutenticacaoController {
+public class UsuarioAutenticacaoController {
 
     @Autowired
     private AuthenticationManager manager;
