@@ -125,3 +125,11 @@ Nesta aula vi a importância de isolar regras de negócio e lógicas em classes 
 Também aprendi como fazer validações de integridade das informações recebidas nas requisições, ou seja, além de fazer as verificações básicas que já havia feito com o Spring Validation, validar se existe uma entidade com o id passado no atributo da requisição, por exemplo.
 
 Além disso, aprendi como criar queries personalizadas no nosso banco de dados para aplicarmos lógicas de filtragem mais complexas e que não seriam possíveis de fazer apenas seguindo o padrão de nomenclatura dos métodos do respository.
+
+### Aula 2
+
+#### Fazendo validações e aplicando SOLID
+
+Nesta aula vi como aplicar validações de regras de negócio seguindo alguns dos princípios SOLID, assim tornando o processo de manutenção dessas validações, ou até mesmo o processo de acrescentar uma nova validação, mais fácil.
+
+Também aprendi como utilizar interfaces nas classes de validação das regras de negócio para conseguir usar o polimorfismo, dessa forma não tendo que instanciar uma por uma no nosso @Service, apenas tendo que injetar uma List com o tipo da nossa interface utilizando o @Autowired, assim podendo utilizar o método "forEach();" para iterar por cada classe de validação executando a validação. Isso torna o processo de adicionar/remover validações muito mais simples.

@@ -783,3 +783,39 @@ Também podemos perceber que temos alguns atributos com o sinal ":" antes do nom
 O resto é bem parecido com SQL, um conhecimento que é bom ter e preciso estudar mais sobre, além de estudar o JPA e o JPQL em si.
 
 É importante lembrar que quando precisamos fazer uma filtragem diferente dos registros no banco para conseguirmos uma ou mais instâncias de entidades, também podemos fazer a lógica no próprio Java, mas isso não é uma boa prática, levando em conta que os bancos de dados já são muito mais otimizados para aplicar esses filtros, assim se tornando uma boa prática realizar esta filtragem a partir da query no banco mesmo.
+
+============VALIDAÇÕES DE REGRAS DE NEGÓCIO============
+
+É comum que a gente tenha diversas regras de negócio para implementar no nosso código, o que se formos fazer com vários ifs no método principal da funcionalidade vai se tornar algo gigantesco, de muito difícil manutenção e muito difícil de adicionar novas funcionalidades, se necessário. Por isso devemos isolar cada validação em uma classe de validação separada, assim seguindo as boas práticas.
+
+Devemos colocar a annotation @Component nessas novas classes de validação, para assim o Spring saber que deve carregar aquelas classes no projeto.
+
+Importante saber que desta forma teríamos que ter uma instância de cada uma dessas classes no nosso @Service, o que não é nada prático e deixaria o nosso código difícil de dar manutenção.
+
+Para solucionar este problema, devemos também criar uma interface que as nossas classes de validação irão implementar, sempre implementando a validação de cada classe no mesmo método da interface, para assim conseguirmos utilizar o polimorfismo.
+
+Com todos os nossos componentes de validação implementando a interface que criamos, basta termos uma List<<interface que criamos>> com a annotation @Autowired, que assim o Spring irá instanciar dentro dessa lista todos os nossos componentes que implementam a interface que criamos, assim nos possibilitando fazer um "forEach();" que irá aplicar todas as validações a partir do nosso DTO.
+
+============SOLID============
+
+É uma sigla que representa 5 princípios de boa prática em programação.
+
+Single Responsibility Principle (Princípio da Responsabilidade Única)
+Open-Closed Principle (Princípio Aberto-Fechado)
+Liskov Substitution Principle (Princípio da Substituição de Liskov)
+Interface Segregation Principle (Princípio da Segregação de Interface)
+Dependency Inversion Principle (Princípio da Inversão de Dependência)
+
+Irei estudar SOLID com mais atenção posteriormente.
+
+============nativeQuery = true============
+
+Podemos colocar esse parâmetro na annotation @Query, assim dizendo que a query que estamos fazendo não deverá ser feita com os padrões do JPQL, e sim utilizando os padrões do SGBD que estamos utilizando, impossibilitando o uso direto de nossas classes e atributos no query, podendo apenas utilizar essas coisas como parâmetros dinâmicos.
+
+Isso pode ser muito interessante quando queremos utilizar uma funcionalidade específica do SQL do SGBD que estamos utilizando, como a função DATE(), por exemplo.
+
+============DATE() MYSQL============
+
+Podemos usar essa função do MySQL para transformarmos uma data com informação de horário para uma sem informação de horário, assim fazendo com que possamos comparar essa data com outra checando apenas a data em si.
+
+

@@ -2,7 +2,7 @@ package med.voll.api.infra.exception;
 
 
 import jakarta.persistence.EntityNotFoundException;
-import med.voll.api.exception.consulta.ValidacaoException;
+import med.voll.api.validacao.exception.ValidacaoException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;

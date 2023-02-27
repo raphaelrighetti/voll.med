@@ -5,7 +5,7 @@ import jakarta.validation.Valid;
 import med.voll.api.dto.consulta.ConsultaDTOAgendamento;
 import med.voll.api.dto.consulta.ConsultaDTOCancelamento;
 import med.voll.api.dto.consulta.ConsultaDTODetalhamento;
-import med.voll.api.entity.medico.Medico;
+import med.voll.api.entity.consulta.Consulta;
 import med.voll.api.service.consulta.ConsultaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +27,16 @@ public class ConsultaController {
             @RequestBody @Valid ConsultaDTOAgendamento dados,
             UriComponentsBuilder uriBuilder
     ) {
-        service.agendar(dados);
+        ConsultaDTODetalhamento dto = service.agendar(dados);
 
         URI uri = uriBuilder.path("/consultas/{id}").buildAndExpand(dados.medicoId()).toUri();
 
-        return ResponseEntity.created(uri).body(new ConsultaDTODetalhamento(null, null, null, null, null));
+        return ResponseEntity.created(uri).body(dto);
     }
 
     @DeleteMapping
     @Transactional
+
     public ResponseEntity cancelar(@RequestBody @Valid ConsultaDTOCancelamento dados) {
         service.cancelar(dados);
 

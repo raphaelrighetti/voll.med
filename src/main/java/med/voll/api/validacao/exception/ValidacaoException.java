@@ -1,4 +1,4 @@
-package med.voll.api.exception.consulta;
+package med.voll.api.validacao.exception;
 
 public class ValidacaoException extends RuntimeException {
 

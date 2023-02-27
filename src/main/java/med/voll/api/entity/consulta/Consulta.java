@@ -29,7 +29,7 @@ public class Consulta {
     private Paciente paciente;
     private LocalDateTime data;
     @Enumerated(EnumType.STRING)
-    private ConsultaStatus status = ConsultaStatus.AGENDADA;
+    private ConsultaStatus status;
     @Column(name = "motivo_cancelamento")
     @Enumerated(EnumType.STRING)
     private ConsultaMotivoCancelamento motivo;

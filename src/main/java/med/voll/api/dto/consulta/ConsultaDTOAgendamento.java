@@ -2,6 +2,7 @@ package med.voll.api.dto.consulta;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import med.voll.api.entity.medico.MedicoEspecialidade;
 
 import java.time.LocalDateTime;
