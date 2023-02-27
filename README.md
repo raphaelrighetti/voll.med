@@ -2,7 +2,7 @@
 
 ## Spring Boot 3: desenvolva uma API Rest em Java
 
-Estudos de Spring Boot do curso Spring Boot 3: desenvolva uma API Rest em Java da Alura.
+Estudos de Spring Boot do curso "Spring Boot 3: desenvolva uma API Rest em Java" da Alura.
 
 Neste curso irei desenvolver uma API REST para um consultório médico fictício chamado Voll.med.
 Como o curso é focado somente na construção de uma API REST utilizando Java e Spring, não terá nenhum tipo de interface do usuário, mas fica como desafio para mim fazer uma aplicação client-side que integra com essa API.
@@ -54,7 +54,7 @@ Mal posso esperar para começar o próximo curso!
 
 ## Spring Boot 3: aplique boas práticas e proteja uma API Rest
 
-Estudos de Spring Boot do curso Spring Boot 3: aplique boas práticas e proteja uma API Rest da Alura.
+Estudos de Spring Boot do curso "Spring Boot 3: aplique boas práticas e proteja uma API Rest" da Alura.
 
 Neste curso irei continuar o desenvolvimento da API REST da Voll.med, dessa vez aplicando boas práticas e protejendo-a.
 
@@ -109,3 +109,19 @@ Foi uma aula com muito conteúdo e nem tudo está fixado na minha cabeça ainda,
 Nesse curso aprendi muita coisa interessante e importante, desde como ter respostas personalizadas na API tratando as Exceptions causadas pelas requisições, até como fazer uma autenticação e autorização completa de usuários na API seguindo o modelo Stateless, entre muitos outros detalhes de como tudo funciona.
 
 Sem dúvida foi o curso mais complexo de Spring que finalizei até agora e me sinto muito mais preparado para continuar estudando e melhorando cada vez mais.
+
+## Spring Boot 3: documente, teste e prepare uma API para o deploy
+
+Estudos de Spring Boot do curso "Spring Boot 3: documente, teste e prepare uma API para o deploy" da Alura.
+
+Neste curso irei continuar o desenvolvimento da API REST da Voll.med, dessa vez adicionando novas funcionalidades de agendamento e cancelamento de consultas com validações mais complexas. Também irei aprender a como gerar uma documentação para a API, assim como prepará-la para o deploy.
+
+### Aula 1
+
+#### Começando com novas funcionalidades
+
+Nesta aula vi a importância de isolar regras de negócio e lógicas em classes @Service, assim fazendo com que os controllers tenham apenas a responsabilidade de tratar o fluxo das requisições, chamando a lógica de outro lugar.
+
+Também aprendi como fazer validações de integridade das informações recebidas nas requisições, ou seja, além de fazer as verificações básicas que já havia feito com o Spring Validation, validar se existe uma entidade com o id passado no atributo da requisição, por exemplo.
+
+Além disso, aprendi como criar queries personalizadas no nosso banco de dados para aplicarmos lógicas de filtragem mais complexas e que não seriam possíveis de fazer apenas seguindo o padrão de nomenclatura dos métodos do respository.

@@ -1,6 +1,6 @@
 package med.voll.api.entity.medico;
 
-public enum Especialidade {
+public enum MedicoEspecialidade {
 
     ORTOPEDIA,
     CARDIOLOGIA,

@@ -4,6 +4,8 @@ create table consulta(
     medico_id bigint not null,
     paciente_id bigint not null,
     data datetime not null,
+    status varchar(20) not null,
+    motivo_cancelamento varchar(20),
 
     primary key(id),
     constraint fk_consultas_medico_id foreign key(medico_id) references medico(id),

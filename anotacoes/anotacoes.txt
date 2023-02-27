@@ -702,6 +702,18 @@ Importante saber que podemos validar no nosso DTO se a data recebida na requisi�
 
 Para isso, basta colocarmos a annotation @Future do Spring Validation no nosso campo que estará a data.
 
+Podemos alterar o padrão de Strings de datas do Spring, assim podendo utilizar outro padrão de nossa escolha nas requisições.
+
+Para isso utilizamos:
+
+"@JsonFormat(pattern = <novo padrão>)"
+
+Por exemplo:
+
+@JsonFormat(pattern = "dd/MM/yyyy HH:mm")
+
+Bem intuitivo.
+
 ============RELACIONAMENTOS EM ENTITIES============
 
 O Spring Data JPA e o JPA em si nos fornecem diversas annotations para trabalharmos com nossas entidades. Entre elas temos as annotations que nos permitem trabalhar com relacionamentos entre as nossas entidades.
@@ -712,3 +724,62 @@ Não irei entrar em detalhes sobre cada uma delas, mas é importante lembrar que
 - A primeira palavra de todas elas sempre se refere à entidade na qual estamos estabelecendo o relacionamento, isto é, se utilizamos a annotation @ManyToOne, estamos dizendo ao Spring que uma instância da nossa entidade terá apenas uma instância da entidade em questão, já essa instância da outra entidade poderá ter várias instâncias da nossa entidade com relacionamento com ela.
 
 Importante saber que o FetchType especifica se os relacionamentos serão carregados mesmo sem o uso deles ou não, onde com o FetchType.LAZY não serão e com o FetchType.EAGER serão.
+
+============@JsonAlias({<aliases...>})============
+
+É uma annotation que nos permite definir nomes alternativos para campos do nosso DTO que irá receber dados do corpo da requisição, assim fazendo com que mesmo que a aplicaçõa cliente envie os dados com atributos com nomes diferentes, mapeamos os nomes usados para os atributos corretos do nosso DTO.
+
+Por poder receber um array como parâmetro, podemos ter vários aliases para um só atributo do DTO, o que é muito bom.
+
+============RESPONSABILIDADE CONTROLLER============
+
+Os controllers devem apenas controlar o fluxo de execução, isto é, não devem ter regras de negócio, lógicas, cálculas dentro deles, apenas fazer o fluxo do que chamar e que resposta retornar dependendo do que acontecer.
+
+Para aplicarmos regras de negócio e etc, temos que utilizar uma classe @Service.
+
+============ALL ARGS CONSTRUCTOR============
+
+Até agora não havia utilizado o @AllArgsConstructor de nenhuma entidade, então não sabia muito bem a utilidade dele, mas agora descobri.
+
+O @AllArgsConstructor é muito útil quando precisamos passar diversos objetos, que podem ser entidades JPA também, para construir o nosso objeto, uma vez que para termos os objetos que serão passados nesse construtor, temos que ter alguma lógica de busca das entidades nos seus respectivos repositories, pois não podemos receber um objeto instanciado no corpo de uma requisição, e fazer essa lógica de inicialização do objeto diretamente dentro da entidade em que criaríamos o construtor seria uma má prática.
+
+============VALIDAÇÕES DE INTEGRIDADE============
+
+As vezes precisamos checar se algum valor recebido no corpo da requisição é íntegro, ou seja, mesmo que esteja válido no padrão que colocamos no Spring Validation, precisamos checar se aquele valor realmente existe no nosso banco de dados, por exemplo.
+
+Se recebemos um id de um paciente e precisamos pegar esse paciente no repository, primeiro precisamos checar se existe um paciente com aquele id.
+
+Para isso temos alguns métodos de verificação nos repositories, um deles sendo o "existsById(Long id);", que checa se existe um registro no banco de dados com o id passado por parâmetro.
+
+============QUERIES PERSONALIZADAS NO BANCO============
+
+As vezes podemos precisar de queries personalizadas no nosso banco para buscar entidades com filtros mais complexos dos que conseguimos fazer apenas utilizando o padrão de nomenclatura dos repositories.
+
+Para isso utilizamos a annotation @Query(<JPQL query>) em cima do método que criamos.
+
+Essa annotation nos permite fazer queries personalizadas utilizando a JPQL (Java Persistence Query Language), uma linguagem de query aos bancos de dados que nos permite escrever em uma sintaxe onde podemos utilizar valores dinâmicos para atributos e respeitando os nomes dos atributos da entidade JPA em si, mesmo que sejam diferentes no banco de dados.
+
+Uma query de exemplo:
+
+@Query("""
+                select m from Medico m
+                where
+                m.ativo = 1
+                and
+                m.especialidade = :especialidade
+                and
+                m.id not in(
+                        select c.medico.id from Consulta c
+                        where
+                        c.data = :data
+                )
+                order by rand()
+                limit 1
+                """)
+
+Podemos perceber que criamos uma referência com o nome "m" para o médico, onde para acessar os atributos apenas utilizamos um "." com o nome do atributo que queremos em seguida.
+Também podemos perceber que temos alguns atributos com o sinal ":" antes do nome quando estamos fazendo comparações. Esses atributos recebem este sinal porque são atributos dinâmicos que recebemos por parâmetro no método, e usamos esta sintaxe para utilizarmos o valor deles e não um valor estático.
+
+O resto é bem parecido com SQL, um conhecimento que é bom ter e preciso estudar mais sobre, além de estudar o JPA e o JPQL em si.
+
+É importante lembrar que quando precisamos fazer uma filtragem diferente dos registros no banco para conseguirmos uma ou mais instâncias de entidades, também podemos fazer a lógica no próprio Java, mas isso não é uma boa prática, levando em conta que os bancos de dados já são muito mais otimizados para aplicar esses filtros, assim se tornando uma boa prática realizar esta filtragem a partir da query no banco mesmo.
