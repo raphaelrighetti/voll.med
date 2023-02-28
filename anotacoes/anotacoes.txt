@@ -818,4 +818,55 @@ Isso pode ser muito interessante quando queremos utilizar uma funcionalidade esp
 
 Podemos usar essa função do MySQL para transformarmos uma data com informação de horário para uma sem informação de horário, assim fazendo com que possamos comparar essa data com outra checando apenas a data em si.
 
+============DOCUMENTAÇÃO COM SpringDoc============
 
+Sempre precisamos fazer uma documentação da nossa API, para assim deixarmos claro o funcionamento dela para outras pessoas que forem desenvolver aplicações que integrem com a nossa API.
+
+Para isso não precisamos escrever manualmente a documentação em um Google Docs da vida, existem algumas ferramentas que são capazes de gerar documentações com base no nosso código, como o SpringDoc.
+
+Só de adicionarmos a dependência do SpringDoc no nosso projeto ela já disponibiliza algumas URLs novas, sendo elas:
+
+- "/swagger-ui.html"
+- "/v3/api-docs"
+
+A URL do Swagger disponibiliza uma interface bonita com diversas informações sobre a nossa API, mostrando todos os controllers, os métodos HTTP aceitos e, inclusive, deixando a gente testar eles como se estivéssemos no Insomnia. Importante lembrar que por padrão essa interface não vem com a opção de colocarmos tokens na requisição, mas isso é algo que podemos mudar, assim como diversas outras coisas.
+
+A URL que finaliza com "api-docs" retorna um JSON com muitas informações sobre a nossa API e o funcionamento dela, dando até a possibilidade de usarmos esse JSON para gerar uma aplicação cliente automaticamente (não faço ideia de como isso é feito, mas é bom saber que existe a possibilidade).
+
+É importante lembrarmos que como estamos utilizando o Spring Security no nosso projeto, as URLs necessitam de autenticação por padrão, ou seja, essas URLs do SpringDoc também precisarão de autenticação para serem acessadas, mas para mudar isso basta mexermos no nosso SecurityFilterChain. É bom liberarmos a URL "/swagger-ui/**" e a "/v3/api-docs/**, para assim liberar todas URLs onde estarão o JS, CSS, etc. que o Swagger UI vai utilizar para criar a interface.
+
+O SpringDoc utiliza a especificação de documentação de APIs OpenAPI, que veio depois do Swagger e está em constante evolução, assim criando um padrão de como APIs devem ser documentadas, sempre em formato yaml ou JSON.
+
+============AUTORIZAÇÃO NO SWAGGER UI============
+
+Para colocarmos a opção de mandarmos o token na requisição, precisamos fazer algumas configurações adicionais, ou seja, precisamos de uma classe @Configuration.
+
+Dentro dessa classe @Configuration, precisamos retornar um @Bean do tip  OpenAPI que podemos construir com a própria classe OpenAPI, usando a palavra chave "new" e colocando diversos métodos que irão mexer na configuração desse @Bean.
+
+Como são várias configurações que podem ser feitas, não irei narrar todas, mas para esse caso específico o código é este:
+
+    @Bean
+     public OpenAPI customOpenAPI() {
+         return new OpenAPI()
+                        .components(new Components()
+                            .addSecuritySchemes("bearer-key",
+                            new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));
+    }
+
+Além de fazermos essa configuração, precisamos especificar em quais métodos ou controllers serão exigidos essa autenticação, para assim o SpringDoc saber onde colocar essa funcionalidade de mandar o token no Header.
+
+Fazemos isso com as annotations:
+
+"@SecurityRequirement(name = "bearer-key")"
+
+ou
+
+"@Operation(security = { @SecurityRequirement(name = "bearer-key") })"
+
+Importante lembrarmos que qualquer coisa que precisamos fazer utilizando alguma ferramenta, provavelmente encontraremos como fazer olhando na documentação e pesquisando por termos que remetem o que queremos.
+
+Essa interface do Swagger UI é muito boa e muito interessante, até tornando-se melhor de utilizar do que o próprio Insomnia.
+
+Podemos fazer diversas outras configurações no nosso @Bean OpenAPI, para colocar título, descrição, licença, outras informações, enfim. Para saber como fazer essas coisas, basta olhar na documentação:
+
+https://spec.openapis.org/oas/latest.html#schema

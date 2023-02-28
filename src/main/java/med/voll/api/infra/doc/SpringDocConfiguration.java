@@ -1,4 +1,4 @@
-package med.voll.api.infra.documentacao;
+package med.voll.api.infra.doc;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

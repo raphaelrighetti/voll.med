@@ -133,3 +133,13 @@ Além disso, aprendi como criar queries personalizadas no nosso banco de dados p
 Nesta aula vi como aplicar validações de regras de negócio seguindo alguns dos princípios SOLID, assim tornando o processo de manutenção dessas validações, ou até mesmo o processo de acrescentar uma nova validação, mais fácil.
 
 Também aprendi como utilizar interfaces nas classes de validação das regras de negócio para conseguir usar o polimorfismo, dessa forma não tendo que instanciar uma por uma no nosso @Service, apenas tendo que injetar uma List com o tipo da nossa interface utilizando o @Autowired, assim podendo utilizar o método "forEach();" para iterar por cada classe de validação executando a validação. Isso torna o processo de adicionar/remover validações muito mais simples.
+
+### Aula 3
+
+#### Documentando a API
+
+Nessa aula vi como utilizar o SpringDoc para gerar a documentação de APIs feitas com Spring, uma ferramenta muito poderosa e simples de usar que automatiza o processo de documentação de APIs gerando um JSON que pode ser lido por outra ferramenta, ou até mesmo utilizado para automatização do processo de criação de aplicações clientes que integram com a nossa API, além de gerar uma interface gráfica no navegador com base no Swagger UI que podemos utilizar como ferramenta de teste da nossa API, assim como um Insomnia ou Postman.
+
+Também vi como aplicar configurações diferenciadas na geração dessa interface gráfica utilizando uma classe @Configuration que retorna um @Bean do tipo OpenAPI, onde podemos aplicar diversas configurações.
+
+Além disso, aprendi um pouco da história do Swagger e do OpenAPI e a importância de padronizarmos a documentação das nossas APIs.
