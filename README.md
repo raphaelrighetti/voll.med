@@ -155,3 +155,29 @@ Aprendi também o fluxo given/when/then, algo que não tinha visto antes e que a
 Vi como configurar os testes nos repositories de modo que os testes sejam feitos em um banco de dados exclusivo para testes criando novos profiles com outros arquivos application.properties, como utilizar mocks para fazer testes em controllers onde a requisição é simulada, como utilizar o JacksonTester para transformar DTOs em strings JSON e muitos outros detalhes sobre como essas coisas funcionam.
 
 Foi uma aula muito completa e com muito conteúdo novo. Sem dúvida irei rever as aulas algumas vezes para fixar o conhecimento, pois são muitas classes e muitos detalhes para conseguir realmente ter tudo funcionando do jeito que queremos.
+
+### Aula 5
+
+#### Buildando o projeto
+
+Nesta aula vi como buildar o projeto em um arquivo .jar utilizando o Maven pelo próprio IntelliJ, criando um novo profile para produção, onde as propriedades de conexão e autenticação ao banco de dados são lidas de variáveis de ambiente, assim tornando a aplicação menos vulnerável e modificável, caso seja necessário mudar essas propriedades, sem ter necessidade de buildar o projeto novamente.
+
+Também aprendi como escolher o profile a ser utilizado ao rodar o .jar, assim como passar as variáveis de ambiente definidas no profile por meio de parâmetros no comando de subir a aplicação.
+
+Além disso, vi que gerar um .jar não é a única escolha disponível para buildar a nossa aplicação, podemos também buildar ela para um arquivo .war ou uma Native Image com o GraalVM, o que faz com que a nossa aplicação se torne um binário executável, sem precisar da JVM para rodar e com uma performance muito mais alta.
+
+### Conclusão
+
+Neste curso aprendi coisas muito importantes no desenvolvimento de APIs REST com o Spring Boot, sendo elas:
+
+- Como fazer queries personalizadas no banco de dados;
+- Como aplicar princípios SOLID ao criar validações de regras de negócio, assim tornando a manutenção e adição de novas validações muito mais fácil;
+- Como gerar uma documentação seguindo a especificação OpenAPI utilizando o SpringDoc;
+- Como fazer testes automatizados nos repositories e controllers da API utilizando JUnit, AssertJ e Mockito;
+- Como fazer o build final da aplicação e as alternativas que temos.
+
+Com a finalização deste curso, também finalizei a formação Java e Spring Boot, onde aprendi muita coisa e pude desenvolver um projeto muito interessante aplicando os conhecimentos obtidos durante as aulas.
+
+Tenho noção de que ainda tenho muita coisa para aprender no Spring para realmente dominar o framework e seus módulos, mas após ter finalizado essa formação me sinto muito mais confortável para desenvolver novos projetos e aprender as coisas que ainda não sei pesquisando e aplicando-as.
+
+Estou muito feliz com toda essa jornada de estudos que tive até agora e muito animado com o que vem pela frente!

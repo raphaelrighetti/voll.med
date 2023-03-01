@@ -973,3 +973,31 @@ Tendo essa dependência "mockada", nenhum método que seria chamado dela no cont
 "when(<método da dependência mock>(<params>)).thenReturn(<DTO>);"
 
 Dessa forma definimos que quando o método do bean mock for chamado, ele irá retornar o DTO que definimos no "thenReturn();", assim podendo comparar o retorno com o esperado.'
+
+============BUILD DO PROJETO============
+
+Quando fazemos build do nosso projeto para produção é muito importante que criemos outro profile, onde as propriedades de conexão com banco de dados, usuário, senha, etc. estejam todas sendo lidas de variáveis de ambiente e todas outras propriedades que não se aplicam ao ambiente de produção sejam sobrescritas.
+
+Para buildar o nosso projeto, basta executarmos a ação "package" do menu do Maven no IntelliJ, o que irá gerar o .jar na nossa pasta target. Importante lembrar que o build só ocorre de fato se não acontecer nenhum erro e todos os testes que fizemos passarem, sem exceção.
+
+Para rodarmos a nossa aplicação com o arquivo .jar é o mesmo processo que quando vamos rodar qualquer .jar, basta executar no terminal o comando:
+
+"java -jar <caminho do arquivo>"
+
+Dessa forma já temos a aplicação rodando, mas com o profile default.
+
+Para mudar o profile quando subirmos a aplicação, precisamos passar um parâmetro que diz qual profile queremos usar no comando em que rodamos a aplicação. 
+
+Esse parâmetro é:
+
+"-Dspring.profiles.active=<profile>"
+
+Importante lembrarmos que esse "-D" irá aparecer em qualquer parâmetro que queremos passar, ele que dirá que o que estamos digitando deve ser usado pela aplicação. Inclusive, é dessa forma que podemos passar variáveis de ambiente por parâmetro, não precisamos delas necessariamente no sistema operacional.
+
+Exemplo:
+
+"-D<nome da variável>=<valor que queremos>"
+
+Podemos também gerar um .war em vez de um .jar, mas normalmente fazemos o build com o .jar mesmo. Para isso, algumas alterações devem ser feitas na classe main do projeto e no arquivo pom.xml, mas basta dar uma googlada para saber exatamente como fazer, se for necessário.
+
+Podemos também builda uma Native Image do nosso projeto, um arquivo binário que não depende da JVM para ser executado, mas que ainda assim terá os recursos dela. O Spring Boot 3 dá suporte a isso e é relativamente simples de gerar esse arquivo binário, fazendo o uso do GraalVM (precisamos ter ele instalado na máquina) e um plugin do maven que dá suporte à ele. Para saber exatamente como usar, podemos olhar no documentação, assim como pesquisar sobre, pois é um recurso bem interessante, mas que não irei utilizar agora.
