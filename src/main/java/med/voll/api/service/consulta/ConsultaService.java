@@ -45,7 +45,14 @@ public class ConsultaService {
 
         Paciente paciente = pacienteRepository.getReferenceById(dados.pacienteId());
         Medico medico = escolherMedico(dados);
-        Consulta consulta = new Consulta(null, medico, paciente, dados.data().withMinute(0), ConsultaStatus.AGENDADA, null);
+        Consulta consulta = new Consulta(
+                null,
+                medico,
+                paciente,
+                dados.data().withMinute(0),
+                ConsultaStatus.AGENDADA,
+                null
+        );
 
         consultaRepository.save(consulta);
 

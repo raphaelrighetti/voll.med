@@ -1,7 +1,6 @@
 package med.voll.api.validacao.consulta.agendamento;
 
 import med.voll.api.dto.consulta.ConsultaDTOAgendamento;
-import med.voll.api.entity.consulta.Consulta;
 import med.voll.api.repository.consulta.ConsultaRepository;
 import med.voll.api.validacao.consulta.abstracao.ValidacaoAgendamentoConsulta;
 import med.voll.api.validacao.exception.ValidacaoException;

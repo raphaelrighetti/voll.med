@@ -1,8 +1,8 @@
 package med.voll.api.dto.medico;
 
 import med.voll.api.dto.endereco.EnderecoDTODetalhe;
-import med.voll.api.entity.medico.MedicoEspecialidade;
 import med.voll.api.entity.medico.Medico;
+import med.voll.api.entity.medico.MedicoEspecialidade;
 
 public record MedicoDTODetalhe(
         Long id,

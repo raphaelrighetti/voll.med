@@ -37,7 +37,6 @@ public class ConsultaController {
 
     @DeleteMapping
     @Transactional
-
     public ResponseEntity cancelar(@RequestBody @Valid ConsultaDTOCancelamento dados) {
         service.cancelar(dados);
 

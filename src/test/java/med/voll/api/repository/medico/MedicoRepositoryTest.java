@@ -31,8 +31,13 @@ public class MedicoRepositoryTest {
 
     @Autowired
     private MedicoRepository repository;
+
     @Autowired
     private TestEntityManager em;
+
+    private final LocalDateTime proximaSegundaFeiraAs10 = LocalDate.now()
+            .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
+            .atTime(10, 0);
 
     @Test
     @DisplayName("Médico escolhido deveria ser null quando não houver disponibilidade na data/hora")
@@ -49,10 +54,6 @@ public class MedicoRepositoryTest {
                 "rodolfo@teste.com",
                 "12345678901"
         ));
-
-        LocalDateTime proximaSegundaFeiraAs10 = LocalDate.now()
-                .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
-                .atTime(10, 0);
 
         agendarConsulta(medico, paciente, proximaSegundaFeiraAs10);
 
@@ -73,10 +74,6 @@ public class MedicoRepositoryTest {
                 "123456",
                 MedicoEspecialidade.ORTOPEDIA
         ));
-
-        LocalDateTime proximaSegundaFeiraAs10 = LocalDate.now()
-                .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
-                .atTime(10, 0);
 
         Medico medicoEscolhido = repository.escolherMedicoPorEspecialidadeEDataDisponivel(
                 MedicoEspecialidade.ORTOPEDIA,
@@ -109,10 +106,6 @@ public class MedicoRepositoryTest {
                 "12345678901"
         ));
 
-        LocalDateTime proximaSegundaFeiraAs10 = LocalDate.now()
-                .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
-                .atTime(10, 0);
-
         agendarConsulta(medico1, paciente, proximaSegundaFeiraAs10);
 
         Medico medicoEscolhido = repository.escolherMedicoPorEspecialidadeEDataDisponivel(
@@ -138,10 +131,6 @@ public class MedicoRepositoryTest {
                 "rodolfo@teste.com",
                 "12345678901"
         ));
-
-        LocalDateTime proximaSegundaFeiraAs10 = LocalDate.now()
-                .with(TemporalAdjusters.next(DayOfWeek.MONDAY))
-                .atTime(10, 0);
 
         cadastrarConsultaCancelada(medico, paciente, proximaSegundaFeiraAs10);
 

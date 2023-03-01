@@ -1,8 +1,8 @@
 package med.voll.api.repository.medico;
 
 import med.voll.api.dto.medico.MedicoDTOListagem;
-import med.voll.api.entity.medico.MedicoEspecialidade;
 import med.voll.api.entity.medico.Medico;
+import med.voll.api.entity.medico.MedicoEspecialidade;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

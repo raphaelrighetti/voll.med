@@ -143,3 +143,15 @@ Nessa aula vi como utilizar o SpringDoc para gerar a documentação de APIs feit
 Também vi como aplicar configurações diferenciadas na geração dessa interface gráfica utilizando uma classe @Configuration que retorna um @Bean do tipo OpenAPI, onde podemos aplicar diversas configurações.
 
 Além disso, aprendi um pouco da história do Swagger e do OpenAPI e a importância de padronizarmos a documentação das nossas APIs.
+
+### Aula 4
+
+#### Testando repositories e controllers
+
+Nesta aula vi como utilizar o módulo de testes padrão do Srping (o que já vem como dependência quando iniciamos o projeto a partir do Spring Initializr) para aplicar testes de unidade e de integração nas classes repository e controller do projeto. No curso não foi mostrado como fazer os testes nas validações de regras de negócio, pois fugia do escopo de testes no Spring, onde esses testes não necessitariam de nenhum contexto do Spring em si para serem rodados.
+
+Aprendi também o fluxo given/when/then, algo que não tinha visto antes e que ajuda bastante a entender como funciona o fluxo de um teste.
+
+Vi como configurar os testes nos repositories de modo que os testes sejam feitos em um banco de dados exclusivo para testes criando novos profiles com outros arquivos application.properties, como utilizar mocks para fazer testes em controllers onde a requisição é simulada, como utilizar o JacksonTester para transformar DTOs em strings JSON e muitos outros detalhes sobre como essas coisas funcionam.
+
+Foi uma aula muito completa e com muito conteúdo novo. Sem dúvida irei rever as aulas algumas vezes para fixar o conhecimento, pois são muitas classes e muitos detalhes para conseguir realmente ter tudo funcionando do jeito que queremos.

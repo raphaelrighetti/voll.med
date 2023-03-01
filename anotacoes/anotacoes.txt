@@ -870,3 +870,106 @@ Essa interface do Swagger UI é muito boa e muito interessante, até tornando-se
 Podemos fazer diversas outras configurações no nosso @Bean OpenAPI, para colocar título, descrição, licença, outras informações, enfim. Para saber como fazer essas coisas, basta olhar na documentação:
 
 https://spec.openapis.org/oas/latest.html#schema
+
+============TESTE NA API============
+
+É importante saber o que é importante ser testado na nossa API. No caso, coisas que sempre são importantes de serem testadas são:
+
+- Controllers
+- Repositories
+- Regras de negócio
+
+Essas três coisas sempre deverão ser testadas, pois são o coração da nossa API. Lembrando que nem tudo nessas coisas precisa ser testado, apenas as coisas que têm uma complexidade maior e o resultado fica menos previsível.
+
+Quando iniciamos um projeto Spring pelo Spring Initializr, ele já vem com a dependência padrão de testes do Spring, que conta com o JUnit, o Mockito (biblioteca para fazer mocks), o Hamcrest e o AssertJ, ou seja, já temos tudo o que precisamos para fazer testes automatizados na nossa API.
+
+Para fazer testes precisamos de uma classe de testes que vai testar uma ou mais funcionalidades de uma classe, isso não muda no Spring. Devemos criar a classe de teste com o mesmo nome da classe a ser testada, só que finalizando com "Test". Além disso, temos que criar as packages na pasta "test" da mesma forma que temos na pasta "main" (só para os pacotes das classes que formos testar). Devemos marcar os métodos de teste com @Test, da mesma forma que faríamos normalmente com JUnit.
+
+============TESTES EM REPOSITORIES============
+
+Para fazermos testes em repositories precisamos informar ao Spring que aquela classe de teste será para essa finalidade. Para isso marcamos a classe com a annotation @DataJpaTest.
+
+Por padrão, quando executamos um teste com essa annotation, o Spring irá tentar executar os testes com um banco de dados em memória, por exemplo o H2. Se não tivermos a dependência de um banco desses no nosso projeto, já acontecerá um erro logo de cara.
+
+Ter um banco de dados em memória apenas para fazer os testes pode ser uma alternativa boa, levando em conta que a performance será bem melhor, mas, por não ser o mesmo banco de dados que estamos utilizando no nosso projeto, pode ser que os testes não sejam tão fieis assim, onde algo que daria certo em um teste poderia não dar em produção.
+
+Podemos mudar esse padrão, para assim o Spring utilizar o banco de dados do projeto nos testes também, o que será o que faremos no curso.
+
+Fazemos isso marcando a classe de teste com a annotation:
+
+"@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)"
+
+Dessa forma dizemos ao Spring para não trocar o banco de dados ao fazer testes. Também precisamos levar em consideração o fato de que, dessa forma, além de os testes serem feitos com o mesmo banco (o MySQL nesse caso), os testes serão feitos exatamente com o mesmo banco, ou seja, com todos os registros que já estão nele, o que não é uma ideia muito legal. Precisamos ter um banco de dados do mesmo tipo do que usamos no projeto, só que focado somente para testes. Para isso podemos criar outro banco de dados no mesmo servidor que já temos, onde as mesmas migrations já serão rodadas.
+
+Para especificarmos que nos testes o Spring deve se conectar com o banco de testes e não o padrão, devemos criar um arquivo:
+
+"application-<String>.properties"
+
+Esse arquivo irá sobrescrever as propriedades que estão no arquivo "application.properties" que colocarmos nele, mas ainda vai ler dele as que não estiverem sobrescritas nesse arquivo novo.
+
+Para usarmos esse arquivo nas classes de teste, precisamos utilizar a annotation "@ActiveProfiles(<String que colocamos após o traço>)". Dessa forma dizemos ao Spring para usar este perfil, ou seja, utilizar as propriedades definidas no arquivo que criamos em cima das propriedades padrão do projeto.
+
+Nos métodos de teste do repository, precisaremos utilizar os métodos do repository, o que fazemos injetando ele na classe de teste normalmente com o @Autowired.
+
+Além disso, precisamos descrever bem os cenários. Para isso, utilizamos a annotation "@DisplayName(<String descritiva do cenário>)", assim podendo utilizar um nome qualquer para o método em si.
+
+Para fazermos os nossos asserts no test, devemos usar os métodos de assert dos respectivos pacotes que temos no módulo padrão de testes do Spring. Sempre devemos ficar atentos a isso.
+
+Como estamos utilizando um banco de dados para teste e não temos nenhum registro nele, para fazer os testes que precisamos fazer vamos ter que inserir registros no banco a cada teste que formos fazer. Para isso, podemos usar um TestEntiyManager, um EntityManager específico para testes que podemos injetar na classe, utilizando o método "persist()" dele para adicionar os registros no banco. Também é interessante termos métodos para padronizar a criação das entidades a serem persistidas. O TestEntityManager faz com que cada registro adicionado no método de teste seja apagado após a execução, fazendo com que no próximo teste os registros não existam.
+
+Os testes são divididos em três partes:
+
+1. Given / Arrange:
+
+Onde nós criamos todos os registros e coisas que serão utilizadas no teste.
+
+2. When / Act: 
+
+Onde executamos a ação a ser testada.
+
+3. Then / Assert:
+
+Onde checamos se nossa expectativa de resultado bateu ou não.
+
+============TESTES EM CONTROLLERS============
+
+Para fazermos testes em controllers é um pouco diferente do processo de fazer testes em repositories, pois temos que ter o contexto completo do Spring na nossa classe de teste, utilizando a annotation @SpringBootTest acima da classe para isso.
+
+Temos duas alternativas para fazer os testes:
+
+1. Fazer um teste de integração, onde o servidor realmente sobe e tudo o que fazemos acontece realmente como se fosse em produção, só que com um banco de testes e etc.
+2. Fazer um teste de unidade utilizando "mocks", onde testaremos realmente só o controller e o fluxo dele, sem precisar subir todo o projeto, executando tudo em uma simulação.
+
+As duas alternativas são válidas e têm seus prós e contras, mas como normalmente isolamos os testes de regras de negócio e persistência, acabamos fazendo  os testes do controller com mocks mesmo.
+
+Para utilizarmos um mock que será responsável por simular a requisição ao nosso controller, utilizamos a classe MockMvc, injetando-a com o @Autowired. Para conseguirmos injetar essa dependência na nossa classe, devemos marcar a classe com a annotation @AutoConfigureMockMvc, assim fazendo o Spring ser capaz de injetá-la.
+
+Tendo o MockMvc, podemos utilizar o método "perform(<MockHttpServletRequestBuilder>)", que é o método que faz a simulação da requisição. Precisamos passar como parâmetro um método mock que irá fazer a requisição com o método HTTP de nossa escolha. Conseguimos esses métodos a partir da classe MockMvcRequestBuilders, que tem vários métodos estáticos com essa finalidade. Podemos pegar o retorno dessa requisição com os métodos "andReturn()" e "getResponse()", sendo esse retorno um MockHttpServletResponse. Após isso, podemos comparar o valor do status dessa resposta com um valor de status que esperávamos. Importante lembrar que podemos pegar o status que quisermos para comparar usando o HttpStatus.<enum>.value().
+
+Como queremos testar a funcionalidade do controller quando o usuário está autorizado a fazer a requisição também, precisamos assinalar o método com a annotation @WithMockUser, assim o Spring fará com que nessa simulação seja utilizado um usuário fictício que está autorizado.
+
+Para levarmos um corpo na nossa requisição mock, temos que encadear o método que vai buildar a requisição com o método HTTP com alguns métodos, como:
+
+- "contentType(<MediaType>):
+
+    Neste método adicionamos o Header "Content-Type" na nossa requisição, para assim especificar o tipo do corpo dela (na maioria dos casos é JSON).
+
+    Para especificar qual é este tipo do conteúdo, precisamos passar como parâmetro para o método um enum MediaType.<enum>, assim padronizando os tipos de conteúdo aceitos. No caso do JSON o enum é "APPLICATION.JSON".
+
+- "content(<JacksonTester<DTO>>)":
+
+    Neste método adicionamos realmente o corpo da nossa requisição.
+
+    Como o corpo das requisições é representado por DTOs no nosso projeto, precisamos passar o respectivo DTO da requisição por parâmetro desse método. Mas tem um porém, quando estamos enviando a requisição para a API, não passamos diretamento o DTO em questão na requisição, é o Spring que transforma o corpo da requisição no nosso DTO. Nesse caso, temos que fazer o processo inverso, transformando o nosso DTO em um corpo válido para a requisição. Para isso, utilizamos a classe JacksonTester<DTO>, onde temos o método "write(<DTO>);", onde passamos um DTO do tipo especificado nos Generics do JacksonTester e em seguida utilizamos o método "getJson();" para pegar a String JSON do corpo da requisição.
+
+Utilizando estes métodos, ao disparar a requisição mock teremos um corpo sendo enviado nela também e poderemos comparar o corpo da resposta com um JSON esperado, que podemos criar com o JacksonTester também, só que dessa vez com o DTO que é devolvido no retorno.
+
+Importante lembrar que para podermos injetar o JacksonTester na classe de testes temos que anotá-la com a annotation @AutoConfigureJsonTesters, assim falando para o Spring configurá-lo automaticamente.
+
+Importante sabermos também que mesmo disparando uma requisição mock, como o controller que recebe as requisições provavelmente tem algum @Bean de service ou repository, ele irá realmente injetar esse bean, ou seja, mesmo sendo uma requisição mock, irão ser aplicadas as regras de negócio e as ações serão feitas no banco. Para prevenir isso, devemos adicionar a dependência que está causando isso na própria classe de testes, só que com a annotation @MockBean, o que fará com que essa dependência seja um mock, e não o objeto real.
+
+Tendo essa dependência "mockada", nenhum método que seria chamado dela no controller irá funcionar, irá apenas retornar null. Para conseguirmos fazer com que esse método de fato faça algo que nós precisamos que seja feito para o teste, devemos usar o Mockito. Os métodos que iremos usar do Mockito são:
+
+"when(<método da dependência mock>(<params>)).thenReturn(<DTO>);"
+
+Dessa forma definimos que quando o método do bean mock for chamado, ele irá retornar o DTO que definimos no "thenReturn();", assim podendo comparar o retorno com o esperado.'
