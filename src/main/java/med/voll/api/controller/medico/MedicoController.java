@@ -1,13 +1,12 @@
 package med.voll.api.controller.medico;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import med.voll.api.domain.medico.dto.MedicoAtualizacaoDTO;
 import med.voll.api.domain.medico.dto.MedicoCadastroDTO;
 import med.voll.api.domain.medico.dto.MedicoDetalhamentoDTO;
 import med.voll.api.domain.medico.dto.MedicoListagemDTO;
-import med.voll.api.domain.medico.entity.Medico;
-import med.voll.api.domain.medico.repository.MedicoRepository;
 import med.voll.api.domain.medico.service.MedicoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -28,6 +27,7 @@ public class MedicoController {
 
     @PostMapping
     @Transactional
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity<MedicoDetalhamentoDTO> cadastrar(
             @RequestBody @Valid MedicoCadastroDTO dados, UriComponentsBuilder uriBuilder
     ) {
@@ -38,6 +38,7 @@ public class MedicoController {
     }
 
     @GetMapping("/{id}")
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity<MedicoDetalhamentoDTO> detalhar(@PathVariable Long id) {
         MedicoDetalhamentoDTO dto = service.detalhar(id);
 
@@ -45,6 +46,7 @@ public class MedicoController {
     }
 
     @GetMapping
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity<Page<MedicoListagemDTO>> listar(@PageableDefault(sort = {"nome"}) Pageable pageable) {
         Page<MedicoListagemDTO> page = service.listar(pageable);
 
@@ -53,6 +55,7 @@ public class MedicoController {
 
     @PutMapping("/{id}")
     @Transactional
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity<MedicoDetalhamentoDTO> atualizar(
             @PathVariable Long id, @RequestBody @Valid MedicoAtualizacaoDTO dados
     ) {
@@ -63,6 +66,7 @@ public class MedicoController {
 
     @DeleteMapping("/{id}")
     @Transactional
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity inativar(@PathVariable Long id) {
         service.inativar(id);
 

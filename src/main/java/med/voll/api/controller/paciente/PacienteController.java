@@ -1,5 +1,6 @@
 package med.voll.api.controller.paciente;
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import med.voll.api.domain.paciente.dto.PacienteAtualizacaoDTO;
@@ -26,6 +27,7 @@ public class PacienteController {
 
     @PostMapping
     @Transactional
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity<PacienteDetalhamentoDTO> cadastrar(
             @RequestBody @Valid PacienteCadastroDTO dados, UriComponentsBuilder uriBuilder
     ) {
@@ -36,6 +38,7 @@ public class PacienteController {
     }
 
     @GetMapping("/{id}")
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity<PacienteDetalhamentoDTO> detalhar(@PathVariable Long id) {
         PacienteDetalhamentoDTO dto = service.detalhar(id);
 
@@ -43,6 +46,7 @@ public class PacienteController {
     }
 
     @GetMapping
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity<Page<PacienteListagemDTO>> listar(@PageableDefault(sort = {"nome"}) Pageable pageable) {
         Page<PacienteListagemDTO> page = service.listar(pageable);
 
@@ -51,6 +55,7 @@ public class PacienteController {
 
     @PutMapping("/{id}")
     @Transactional
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity<PacienteDetalhamentoDTO> atualizar(
             @PathVariable Long id, @RequestBody @Valid PacienteAtualizacaoDTO dados
     ) {
@@ -61,6 +66,7 @@ public class PacienteController {
 
     @DeleteMapping("/{id}")
     @Transactional
+    @SecurityRequirement(name = "bearer-key")
     public ResponseEntity inativar(@PathVariable Long id) {
         service.inativar(id);
 
