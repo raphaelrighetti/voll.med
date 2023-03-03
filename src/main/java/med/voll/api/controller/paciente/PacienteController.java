@@ -2,15 +2,17 @@ package med.voll.api.controller.paciente;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import med.voll.api.domain.paciente.dto.PacienteAtualizacaoDTO;
 import med.voll.api.domain.paciente.dto.PacienteCadastroDTO;
 import med.voll.api.domain.paciente.dto.PacienteDetalhamentoDTO;
+import med.voll.api.domain.paciente.dto.PacienteListagemDTO;
 import med.voll.api.domain.paciente.service.PacienteService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
@@ -31,5 +33,37 @@ public class PacienteController {
         URI uri = uriBuilder.path("/pacientes/{id}").buildAndExpand(dto.id()).toUri();
 
         return ResponseEntity.created(uri).body(dto);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PacienteDetalhamentoDTO> detalhar(@PathVariable Long id) {
+        PacienteDetalhamentoDTO dto = service.detalhar(id);
+
+        return ResponseEntity.ok(dto);
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<PacienteListagemDTO>> listar(@PageableDefault(sort = {"nome"}) Pageable pageable) {
+        Page<PacienteListagemDTO> page = service.listar(pageable);
+
+        return ResponseEntity.ok(page);
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity<PacienteDetalhamentoDTO> atualizar(
+            @PathVariable Long id, @RequestBody @Valid PacienteAtualizacaoDTO dados
+    ) {
+        PacienteDetalhamentoDTO dto = service.atualizar(id, dados);
+
+        return ResponseEntity.ok(dto);
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity inativar(@PathVariable Long id) {
+        service.inativar(id);
+
+        return ResponseEntity.noContent().build();
     }
 }
