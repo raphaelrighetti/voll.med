@@ -3,6 +3,7 @@ package med.voll.api.domain.usuario.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import med.voll.api.domain.medico.dto.MedicoCadastroDTO;
+import med.voll.api.domain.paciente.dto.PacienteCadastroDTO;
 import med.voll.api.domain.security.autenticacao.Autoridades;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -34,6 +35,11 @@ public class Usuario implements UserDetails {
     public Usuario(MedicoCadastroDTO dados) {
         email = dados.email();
         autoridade = Autoridades.ROLE_MEDICO;
+    }
+
+    public Usuario(PacienteCadastroDTO dados) {
+        email = dados.email();
+        autoridade = Autoridades.ROLE_PACIENTE;
     }
 
     @Override

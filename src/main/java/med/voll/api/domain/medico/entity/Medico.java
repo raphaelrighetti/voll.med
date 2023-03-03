@@ -13,7 +13,7 @@ import med.voll.api.domain.usuario.entity.Usuario;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = {"id", "email"})
+@EqualsAndHashCode(of = {"id", "crm"})
 public class Medico {
 
     @Id
