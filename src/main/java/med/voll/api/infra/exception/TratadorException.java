@@ -1,6 +1,7 @@
 package med.voll.api.infra.exception;
 
 import jakarta.persistence.EntityNotFoundException;
+import med.voll.api.domain.genericos.exception.AutorizacaoException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -22,7 +23,7 @@ public class TratadorException {
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
-    public ResponseEntity entityNotFoundException(EntityNotFoundException e) {
+    public ResponseEntity<Void> entityNotFoundException(EntityNotFoundException e) {
         return ResponseEntity.notFound().build();
     }
 
@@ -34,6 +35,11 @@ public class TratadorException {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErroGenericoDTO> httpMessageNotReadableException() {
         return ResponseEntity.badRequest().body(new ErroGenericoDTO("Requisição precisa de um corpo"));
+    }
+
+    @ExceptionHandler(AutorizacaoException.class)
+    public ResponseEntity<Void> autorizacaoException() {
+        return ResponseEntity.status(403).build();
     }
 
     private record FieldErrorDTO(String campo, String mensagem) {

@@ -1,6 +1,6 @@
 package med.voll.api.domain.endereco.dto;
 
-import med.voll.api.domain.endereco.entity.Endereco;
+import med.voll.api.domain.endereco.Endereco;
 
 public record EnderecoDetalhamentoDTO(
         String logradouro,

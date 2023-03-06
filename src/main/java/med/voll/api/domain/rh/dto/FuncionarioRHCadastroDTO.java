@@ -1,4 +1,4 @@
-package med.voll.api.domain.paciente.dto;
+package med.voll.api.domain.rh.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -10,7 +10,7 @@ import med.voll.api.domain.genericos.annotation.Cpf;
 import med.voll.api.domain.genericos.annotation.Telefone;
 import med.voll.api.domain.security.autorizacao.Autoridades;
 
-public record PacienteCadastroDTO(
+public record FuncionarioRHCadastroDTO(
         @NotBlank
         String nome,
         @NotBlank @Email
@@ -32,6 +32,6 @@ public record PacienteCadastroDTO(
 
         @Override
         public Autoridades getAutoridade() {
-                return Autoridades.ROLE_PACIENTE;
+                return Autoridades.ROLE_RH;
         }
 }

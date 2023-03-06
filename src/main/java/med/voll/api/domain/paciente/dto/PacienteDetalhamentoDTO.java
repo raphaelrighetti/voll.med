@@ -1,7 +1,7 @@
 package med.voll.api.domain.paciente.dto;
 
 import med.voll.api.domain.endereco.dto.EnderecoDetalhamentoDTO;
-import med.voll.api.domain.paciente.entity.Paciente;
+import med.voll.api.domain.paciente.Paciente;
 
 public record PacienteDetalhamentoDTO(
         Long id,

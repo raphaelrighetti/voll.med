@@ -24,5 +24,5 @@ CREATE TABLE medico(
     complemento VARCHAR(100),
 
     PRIMARY KEY (id),
-    CONSTRAINT FK_UsuarioPaciente FOREIGN KEY (usuario_id) REFERENCES usuario(id)
+    CONSTRAINT FK_UsuarioMedico FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );

@@ -1,9 +1,9 @@
 package med.voll.api.domain.medico.dto;
 
 import med.voll.api.domain.endereco.dto.EnderecoDetalhamentoDTO;
-import med.voll.api.domain.medico.entity.Especialidade;
-import med.voll.api.domain.medico.entity.Medico;
-import med.voll.api.domain.security.autenticacao.Autoridades;
+import med.voll.api.domain.medico.Especialidade;
+import med.voll.api.domain.medico.Medico;
+import med.voll.api.domain.security.autorizacao.Autoridades;
 
 public record MedicoDetalhamentoDTO(
         Long id,

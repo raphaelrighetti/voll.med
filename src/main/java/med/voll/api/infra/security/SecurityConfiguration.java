@@ -27,11 +27,16 @@ public class SecurityConfiguration {
         return http.csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().authorizeHttpRequests()
+                .requestMatchers("/**").hasRole("ADMIN")
                 .requestMatchers(
-                        HttpMethod.GET, "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**"
+                        HttpMethod.GET,
+                        "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs", "/v3/api-docs/**"
                 ).permitAll()
-                .requestMatchers(HttpMethod.POST, "/login", "/pacientes").permitAll()
-                .anyRequest().authenticated()
+                .requestMatchers(HttpMethod.POST, "/login", "/pacientes", "/admins").permitAll()
+                .requestMatchers(HttpMethod.GET, "/pacientes", "/medicos").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/medicos").hasRole("MEDICO")
+                .requestMatchers("/pacientes", "/pacientes/**").hasRole("PACIENTE")
+                .requestMatchers("/medicos", "/medicos/**", "/rh", "/rh/**").hasRole("RH")
                 .and().addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

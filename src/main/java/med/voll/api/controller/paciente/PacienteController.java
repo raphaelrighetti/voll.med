@@ -7,7 +7,7 @@ import med.voll.api.domain.paciente.dto.PacienteAtualizacaoDTO;
 import med.voll.api.domain.paciente.dto.PacienteCadastroDTO;
 import med.voll.api.domain.paciente.dto.PacienteDetalhamentoDTO;
 import med.voll.api.domain.paciente.dto.PacienteListagemDTO;
-import med.voll.api.domain.paciente.service.PacienteService;
+import med.voll.api.domain.paciente.PacienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,8 +39,10 @@ public class PacienteController {
 
     @GetMapping("/{id}")
     @SecurityRequirement(name = "bearer-key")
-    public ResponseEntity<PacienteDetalhamentoDTO> detalhar(@PathVariable Long id) {
-        PacienteDetalhamentoDTO dto = service.detalhar(id);
+    public ResponseEntity<PacienteDetalhamentoDTO> detalhar(
+            @PathVariable Long id, @RequestHeader(name = "Authorization") String header
+    ) {
+        PacienteDetalhamentoDTO dto = service.detalhar(id, header);
 
         return ResponseEntity.ok(dto);
     }
@@ -57,9 +59,11 @@ public class PacienteController {
     @Transactional
     @SecurityRequirement(name = "bearer-key")
     public ResponseEntity<PacienteDetalhamentoDTO> atualizar(
-            @PathVariable Long id, @RequestBody @Valid PacienteAtualizacaoDTO dados
+            @PathVariable Long id,
+            @RequestBody @Valid PacienteAtualizacaoDTO dados,
+            @RequestHeader(name = "Authorization") String header
     ) {
-        PacienteDetalhamentoDTO dto = service.atualizar(id, dados);
+        PacienteDetalhamentoDTO dto = service.atualizar(id, dados, header);
 
         return ResponseEntity.ok(dto);
     }
@@ -67,8 +71,10 @@ public class PacienteController {
     @DeleteMapping("/{id}")
     @Transactional
     @SecurityRequirement(name = "bearer-key")
-    public ResponseEntity inativar(@PathVariable Long id) {
-        service.inativar(id);
+    public ResponseEntity<Void> inativar(
+            @PathVariable Long id, @RequestHeader(name = "Authorization") String header
+    ) {
+        service.inativar(id, header);
 
         return ResponseEntity.noContent().build();
     }

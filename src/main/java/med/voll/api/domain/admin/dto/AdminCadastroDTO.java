@@ -1,4 +1,4 @@
-package med.voll.api.domain.paciente.dto;
+package med.voll.api.domain.admin.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -10,7 +10,7 @@ import med.voll.api.domain.genericos.annotation.Cpf;
 import med.voll.api.domain.genericos.annotation.Telefone;
 import med.voll.api.domain.security.autorizacao.Autoridades;
 
-public record PacienteCadastroDTO(
+public record AdminCadastroDTO(
         @NotBlank
         String nome,
         @NotBlank @Email
@@ -25,13 +25,13 @@ public record PacienteCadastroDTO(
         EnderecoCadastroDTO endereco
 ) implements UsuarioCadastro {
 
-        @Override
-        public String getEmail() {
-                return email;
-        }
+    @Override
+    public String getEmail() {
+        return email;
+    }
 
-        @Override
-        public Autoridades getAutoridade() {
-                return Autoridades.ROLE_PACIENTE;
-        }
+    @Override
+    public Autoridades getAutoridade() {
+        return Autoridades.ROLE_ADMIN;
+    }
 }

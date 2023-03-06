@@ -1,4 +1,4 @@
-CREATE TABLE paciente(
+CREATE TABLE funcionario_rh(
     id BIGINT NOT NULL UNIQUE AUTO_INCREMENT,
     nome VARCHAR(100) NOT NULL UNIQUE,
     usuario_id BIGINT NOT NULL UNIQUE,
@@ -13,5 +13,5 @@ CREATE TABLE paciente(
     complemento VARCHAR(100),
 
     PRIMARY KEY (id),
-    CONSTRAINT FK_UsuarioPaciente FOREIGN KEY (usuario_id) REFERENCES usuario(id)
+    CONSTRAINT FK_UsuarioFuncionarioRH FOREIGN KEY (usuario_id) REFERENCES usuario(id)
 );

@@ -1,13 +1,13 @@
-package med.voll.api.controller.medico;
+package med.voll.api.controller.admin;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import med.voll.api.domain.medico.dto.MedicoAtualizacaoDTO;
-import med.voll.api.domain.medico.dto.MedicoCadastroDTO;
-import med.voll.api.domain.medico.dto.MedicoDetalhamentoDTO;
-import med.voll.api.domain.medico.dto.MedicoListagemDTO;
-import med.voll.api.domain.medico.MedicoService;
+import med.voll.api.domain.admin.dto.AdminAtualizacaoDTO;
+import med.voll.api.domain.admin.dto.AdminCadastroDTO;
+import med.voll.api.domain.admin.dto.AdminDetalhamentoDTO;
+import med.voll.api.domain.admin.dto.AdminListagemDTO;
+import med.voll.api.domain.admin.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,36 +19,36 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/medicos")
-public class MedicoController {
+@RequestMapping("/admins")
+public class AdminController {
 
     @Autowired
-    private MedicoService service;
+    private AdminService service;
 
     @PostMapping
     @Transactional
     @SecurityRequirement(name = "bearer-key")
-    public ResponseEntity<MedicoDetalhamentoDTO> cadastrar(
-            @RequestBody @Valid MedicoCadastroDTO dados, UriComponentsBuilder uriBuilder
+    public ResponseEntity<AdminDetalhamentoDTO> cadastrar(
+            @RequestBody @Valid AdminCadastroDTO dados, UriComponentsBuilder uriBuilder
     ) {
-        MedicoDetalhamentoDTO dto = service.cadastrar(dados);
-        URI uri = uriBuilder.path("/medicos/{id}").buildAndExpand(dto.id()).toUri();
+        AdminDetalhamentoDTO dto = service.cadastrar(dados);
+        URI uri = uriBuilder.path("/pacientes/{id}").buildAndExpand(dto.id()).toUri();
 
         return ResponseEntity.created(uri).body(dto);
     }
 
     @GetMapping("/{id}")
     @SecurityRequirement(name = "bearer-key")
-    public ResponseEntity<MedicoDetalhamentoDTO> detalhar(@PathVariable Long id) {
-        MedicoDetalhamentoDTO dto = service.detalhar(id);
+    public ResponseEntity<AdminDetalhamentoDTO> detalhar(@PathVariable Long id) {
+        AdminDetalhamentoDTO dto = service.detalhar(id);
 
         return ResponseEntity.ok(dto);
     }
 
     @GetMapping
     @SecurityRequirement(name = "bearer-key")
-    public ResponseEntity<Page<MedicoListagemDTO>> listar(@PageableDefault(sort = {"nome"}) Pageable pageable) {
-        Page<MedicoListagemDTO> page = service.listar(pageable);
+    public ResponseEntity<Page<AdminListagemDTO>> listar(@PageableDefault(sort = {"nome"}) Pageable pageable) {
+        Page<AdminListagemDTO> page = service.listar(pageable);
 
         return ResponseEntity.ok(page);
     }
@@ -56,10 +56,11 @@ public class MedicoController {
     @PutMapping("/{id}")
     @Transactional
     @SecurityRequirement(name = "bearer-key")
-    public ResponseEntity<MedicoDetalhamentoDTO> atualizar(
-            @PathVariable Long id, @RequestBody @Valid MedicoAtualizacaoDTO dados
+    public ResponseEntity<AdminDetalhamentoDTO> atualizar(
+            @PathVariable Long id,
+            @RequestBody @Valid AdminAtualizacaoDTO dados
     ) {
-        MedicoDetalhamentoDTO dto = service.atualizar(id, dados);
+        AdminDetalhamentoDTO dto = service.atualizar(id, dados);
 
         return ResponseEntity.ok(dto);
     }
