@@ -1,14 +1,11 @@
 package med.voll.api.domain.admin;
 
-import med.voll.api.domain.admin.Admin;
-import med.voll.api.domain.admin.AdminRepository;
 import med.voll.api.domain.admin.dto.AdminAtualizacaoDTO;
 import med.voll.api.domain.admin.dto.AdminCadastroDTO;
 import med.voll.api.domain.admin.dto.AdminDetalhamentoDTO;
 import med.voll.api.domain.admin.dto.AdminListagemDTO;
 import med.voll.api.domain.usuario.Usuario;
 import med.voll.api.domain.usuario.UsuarioRepository;
-import med.voll.api.security.service.JWTService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,9 +20,6 @@ public class AdminService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
-
-    @Autowired
-    private JWTService jwtService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;

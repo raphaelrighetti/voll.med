@@ -1,4 +1,4 @@
-package med.voll.api.controller.paciente;
+package med.voll.api.controller;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.transaction.Transactional;

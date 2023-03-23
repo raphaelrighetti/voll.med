@@ -2,6 +2,8 @@ package med.voll.api.infra.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import med.voll.api.domain.genericos.exception.AutorizacaoException;
+import med.voll.api.domain.genericos.exception.ValidacaoConsultaException;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -14,7 +16,12 @@ import java.util.List;
 
 @RestControllerAdvice
 public class TratadorException {
-
+	
+	@ExceptionHandler(NullPointerException.class)
+	public ResponseEntity<Void> nullPointerException() {
+		return ResponseEntity.notFound().build();
+	}
+	
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<List<FieldErrorDTO>> methodArgumentNotValidException(MethodArgumentNotValidException e) {
         List<FieldErrorDTO> dtoList = e.getFieldErrors().stream().map(FieldErrorDTO::new).toList();
@@ -40,6 +47,11 @@ public class TratadorException {
     @ExceptionHandler(AutorizacaoException.class)
     public ResponseEntity<Void> autorizacaoException() {
         return ResponseEntity.status(403).build();
+    }
+    
+    @ExceptionHandler(ValidacaoConsultaException.class)
+    public ResponseEntity<ErroGenericoDTO> validacaoConsultaException(ValidacaoConsultaException e) {
+    	return ResponseEntity.badRequest().body(new ErroGenericoDTO(e));
     }
 
     private record FieldErrorDTO(String campo, String mensagem) {
