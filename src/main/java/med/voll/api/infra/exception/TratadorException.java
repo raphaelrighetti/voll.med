@@ -40,8 +40,8 @@ public class TratadorException {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErroGenericoDTO> httpMessageNotReadableException() {
-        return ResponseEntity.badRequest().body(new ErroGenericoDTO("Requisição precisa de um corpo"));
+    public ResponseEntity<ErroGenericoDTO> httpMessageNotReadableException(HttpMessageNotReadableException e) {
+        return ResponseEntity.badRequest().body(new ErroGenericoDTO(e.getMessage()));
     }
 
     @ExceptionHandler(AutorizacaoException.class)

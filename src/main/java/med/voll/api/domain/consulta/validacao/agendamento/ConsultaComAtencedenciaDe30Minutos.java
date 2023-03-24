@@ -18,8 +18,8 @@ public class ConsultaComAtencedenciaDe30Minutos implements ValidacaoAgendamentoC
 	
 	@Override
 	public void validar(ConsultaAgendamentoDTO dados) {
-		LocalDateTime dataDaConsulta = repository.getReferenceById(dados.id()).getData();
 		LocalDateTime dataAtual = LocalDateTime.now();
+		LocalDateTime dataDaConsulta = repository.getReferenceById(dados.id()).getData();
 		
 		if (dataAtual.plusMinutes(30).isAfter(dataDaConsulta)) {
 			throw new ValidacaoConsultaException("A consulta deve ser agendada com antecedência mínima de 30 minutos");

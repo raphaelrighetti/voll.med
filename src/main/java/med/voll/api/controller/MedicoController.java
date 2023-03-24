@@ -17,8 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @RestController
 @RequestMapping("/medicos")
@@ -53,14 +51,6 @@ public class MedicoController {
         Page<MedicoListagemDTO> page = service.listar(pageable);
 
         return ResponseEntity.ok(page);
-    }
-    
-    @GetMapping("/{id}/horarios")
-    @SecurityRequirement(name = "bearer-key")
-    public ResponseEntity<List<LocalDateTime>> listarHorariosDisponiveis(@PathVariable Long id) {
-    	List<LocalDateTime> horariosDisponiveis = service.listarHorariosDisponiveis(id);
-    	
-    	return ResponseEntity.ok(horariosDisponiveis);
     }
 
     @PutMapping("/{id}")
