@@ -1,11 +1,11 @@
 package med.voll.api.domain.consulta.cancelamento;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import med.voll.api.domain.medico.Especialidade;
+import med.voll.api.domain.consulta.cancelamento.dto.CancelamentoListagemDTO;
 
 public interface CancelamentoRepository extends JpaRepository<Cancelamento, Long> {
 	
@@ -13,17 +13,11 @@ public interface CancelamentoRepository extends JpaRepository<Cancelamento, Long
 			select c from Cancelamento c
 			where c.paciente.id = :pacienteId
 			""")
-	List<Cancelamento> cancelamentosDoPaciente(Long pacienteId);
+	Page<CancelamentoListagemDTO> cancelamentosDoPaciente(Long pacienteId, Pageable pageable);
 	
 	@Query("""
 			select c from Cancelamento c
 			where c.consulta.medico.id = :medicoId
 			""")
-	List<Cancelamento> cancelamentosDoMedico(Long medicoId);
-	
-	@Query("""
-			select c from Cancelamento c
-			where c.consulta.medico.especialidade = :especialidade
-			""")
-	List<Cancelamento> cancelamentosPorEspecialidade(Especialidade especialidade);
+	Page<CancelamentoListagemDTO> cancelamentosDoMedico(Long medicoId, Pageable pageable);
 }

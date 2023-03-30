@@ -7,6 +7,7 @@ import med.voll.api.domain.medico.dto.MedicoAtualizacaoDTO;
 import med.voll.api.domain.medico.dto.MedicoCadastroDTO;
 import med.voll.api.domain.medico.dto.MedicoDetalhamentoDTO;
 import med.voll.api.domain.medico.dto.MedicoListagemDTO;
+import med.voll.api.domain.medico.Especialidade;
 import med.voll.api.domain.medico.MedicoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping("/medicos")
@@ -51,6 +53,14 @@ public class MedicoController {
         Page<MedicoListagemDTO> page = service.listar(pageable);
 
         return ResponseEntity.ok(page);
+    }
+    
+    @GetMapping("/especialidade/{especialidade}")
+    @SecurityRequirement(name = "bearer-key")
+    public ResponseEntity<List<MedicoListagemDTO>> listarPorEspecialidade(Especialidade especialidade) {
+    	List<MedicoListagemDTO> dtos = service.listarPorEspecialidade(especialidade);
+    	
+    	return ResponseEntity.ok(dtos);
     }
 
     @PutMapping("/{id}")

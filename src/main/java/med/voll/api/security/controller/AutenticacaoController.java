@@ -3,6 +3,9 @@ package med.voll.api.security.controller;
 import jakarta.validation.Valid;
 import med.voll.api.domain.usuario.dto.UsuarioAutenticacaoDTO;
 import med.voll.api.security.service.JWTService;
+
+import java.util.ArrayList;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,9 +30,10 @@ public class AutenticacaoController {
 
         Authentication authentication = manager.authenticate(authenticationToken);
         UserDetails usuario = (UserDetails) authentication.getPrincipal();
+        String role = new ArrayList<>(usuario.getAuthorities()).get(0).toString();
 
-        return new JWTDTO(jwtService.gerarToken(usuario));
+        return new JWTDTO(jwtService.gerarToken(usuario), role);
     }
 
-    private record JWTDTO(String token) { }
+    private record JWTDTO(String token, String role) { }
 }

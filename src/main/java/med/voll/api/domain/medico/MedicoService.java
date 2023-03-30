@@ -7,6 +7,8 @@ import med.voll.api.domain.medico.dto.MedicoListagemDTO;
 import med.voll.api.domain.usuario.Usuario;
 import med.voll.api.domain.usuario.UsuarioRepository;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -45,7 +47,13 @@ public class MedicoService {
     }
 
     public Page<MedicoListagemDTO> listar(Pageable pageable) {
-        return medicoRepository.findMedicosAtivos(pageable);
+        return medicoRepository.medicosAtivos(pageable);
+    }
+    
+    public List<MedicoListagemDTO> listarPorEspecialidade(Especialidade especialidade) {
+    	List<MedicoListagemDTO> dtos = medicoRepository.medicosPorEspecialidade(especialidade);
+    	
+    	return dtos;
     }
 
     public MedicoDetalhamentoDTO atualizar(Long id, MedicoAtualizacaoDTO dados) {

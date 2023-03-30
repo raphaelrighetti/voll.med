@@ -1,9 +1,14 @@
 package med.voll.api.domain.consulta;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -12,12 +17,16 @@ import med.voll.api.domain.consulta.cancelamento.CancelamentoRepository;
 import med.voll.api.domain.consulta.cancelamento.dto.CancelamentoDTO;
 import med.voll.api.domain.consulta.cancelamento.dto.CancelamentoDetalhamentoDTO;
 import med.voll.api.domain.consulta.cancelamento.dto.CancelamentoListagemDTO;
+import med.voll.api.domain.consulta.dia.Dia;
+import med.voll.api.domain.consulta.dia.DiaRepository;
 import med.voll.api.domain.consulta.dto.ConsultaAgendamentoDTO;
 import med.voll.api.domain.consulta.dto.ConsultaDetalhamentoDTO;
 import med.voll.api.domain.consulta.dto.ConsultaDisponivelListagemDTO;
 import med.voll.api.domain.consulta.dto.ConsultaListagemDTO;
+import med.voll.api.domain.consulta.dto.ConsultasDisponiveisNoDiaDTO;
 import med.voll.api.domain.consulta.validacao.ValidacaoAgendamentoConsulta;
 import med.voll.api.domain.consulta.validacao.ValidacaoCancelamentoConsulta;
+import med.voll.api.domain.genericos.exception.ValidacaoConsultaException;
 import med.voll.api.domain.medico.Especialidade;
 import med.voll.api.domain.medico.MedicoRepository;
 import med.voll.api.domain.paciente.Paciente;
@@ -31,6 +40,9 @@ public class ConsultaService {
 	
 	@Autowired
 	private CancelamentoRepository cancelamentoRepository;
+	
+	@Autowired
+	private DiaRepository diaRepository;
 	
 	@Autowired
 	private MedicoRepository medicoRepository;
@@ -92,88 +104,108 @@ public class ConsultaService {
 		return new ConsultaDetalhamentoDTO(consulta);
 	}
 	
-	public List<ConsultaDisponivelListagemDTO> listarConsultasDisponiveis() {
-		List<Consulta> consultas = consultaRepository.consultasDisponiveis(agora());
+	public Page<ConsultaDisponivelListagemDTO> listarConsultasDisponiveis(Pageable pageable) {
+		Page<ConsultaDisponivelListagemDTO> page = consultaRepository.consultasDisponiveis(agora(), pageable);
 		
-		List<ConsultaDisponivelListagemDTO> dtos = consultas.stream().map(ConsultaDisponivelListagemDTO::new).toList();
-		
-		return dtos;
+		return page;
 	}
 	
-	public List<ConsultaDisponivelListagemDTO> listarConsultasDisponiveisDoMedico(Long medicoId) {
-		if (!medicoRepository.existsById(medicoId)) {
-			throw new EntityNotFoundException("Médico não encontrado");
+	public Page<ConsultasDisponiveisNoDiaDTO> listarConsultasDisponiveis(Long medicoId, Especialidade especialidade, Pageable pageable) {
+		if (medicoId != null && !medicoRepository.existsById(medicoId)) {
+			throw new EntityNotFoundException();
 		}
 		
-		List<Consulta> consultas = consultaRepository.consultasDisponiveisDoMedico(medicoId, agora());
-		
-		List<ConsultaDisponivelListagemDTO> dtos = consultas.stream().map(ConsultaDisponivelListagemDTO::new).toList();
-		
-		return dtos;
-	}
-	
-	public List<ConsultaListagemDTO> listarConsultasAgendadas() {
-		List<Consulta> consultas = consultaRepository.consultasAgendadas(agora());
-		
-		List<ConsultaListagemDTO> dtos = consultas.stream().map(ConsultaListagemDTO::new).toList();
-		
-		return dtos;
-	}
-	
-	public List<ConsultaListagemDTO> listarConsultasAgendadasDoMedico(Long medicoId) {
-		if (!medicoRepository.existsById(medicoId)) {
-			throw new EntityNotFoundException("Médico não encontrado");
+		if (especialidade != null && medicoRepository.medicosPorEspecialidade(especialidade).isEmpty()) {
+			throw new EntityNotFoundException();
 		}
 		
-		List<Consulta> consultas = consultaRepository.consultasAgendadasDoMedico(medicoId, agora());
+		List<Dia> dias = diaRepository.diasNoPresenteOuFuturo(LocalDate.now());
+		List<ConsultasDisponiveisNoDiaDTO> dtos = new ArrayList<>();
 		
-		List<ConsultaListagemDTO> dtos = consultas.stream().map(ConsultaListagemDTO::new).toList();
+		dias.forEach(dia -> {
+			List<ConsultaDisponivelListagemDTO> consultas;
+			
+			if (medicoId != null && especialidade != null) {
+				throw new ValidacaoConsultaException("Apenas um parâmetro deve ser passado");
+			} else if (medicoId != null) {
+				consultas = consultaRepository.consultasDisponiveisNoDiaDoMedico(medicoId, dia.getId(), agora());
+			} else if (especialidade != null) {
+				consultas = consultaRepository.consultasDisponiveisNoDiaPorEspecialidade(especialidade, dia.getId(), agora());
+			} else {
+				throw new ValidacaoConsultaException("Um parâmetro precisa ser passado");
+			}
+			
+			ConsultasDisponiveisNoDiaDTO dto = new ConsultasDisponiveisNoDiaDTO(dia.getId(), consultas);
+			
+			dtos.add(dto);
+		});
 		
-		return dtos;
+		int start = (int) pageable.getOffset();
+		int end = Math.min((start + pageable.getPageSize()), dtos.size());
+		
+		Page<ConsultasDisponiveisNoDiaDTO> page = new PageImpl<>(dtos.subList(start, end), pageable, dtos.size());
+		
+		return page;
 	}
 	
-	public List<ConsultaListagemDTO> listarConsultasAgendadasDoPaciente(Long pacienteId) {
-		if (!pacienteRepository.existsById(pacienteId)) {
-			throw new EntityNotFoundException("Paciente não encontrado");
+	public Page<ConsultaListagemDTO> listarConsultasAgendadas(Pageable pageable) {
+		Page<ConsultaListagemDTO> page = consultaRepository.consultasAgendadas(agora(), pageable);
+		
+		return page;
+	}
+	
+	public Page<ConsultaListagemDTO> listarConsultasAgendadas(Long medicoId, Long pacienteId, Pageable pageable) {
+		if (medicoId != null && !medicoRepository.existsById(medicoId)) {
+			throw new EntityNotFoundException();
 		}
 		
-		List<Consulta> consultas = consultaRepository.consultasAgendadasDoPaciente(pacienteId, agora());
-		
-		List<ConsultaListagemDTO> dtos = consultas.stream().map(ConsultaListagemDTO::new).toList();
-		
-		return dtos;
-	}
-	
-	public List<ConsultaListagemDTO> listarConsultasFinalizadas() {
-		List<Consulta> consultas = consultaRepository.consultasFinalizadas();
-		
-		List<ConsultaListagemDTO> dtos = consultas.stream().map(ConsultaListagemDTO::new).toList();
-		
-		return dtos;
-	}
-	
-	public List<ConsultaListagemDTO> listarConsultasFinalizadasDoMedico(Long medicoId) {
-		if (!medicoRepository.existsById(medicoId)) {
-			throw new EntityNotFoundException("Médico não encontrado");
+		if (pacienteId != null && !pacienteRepository.existsById(pacienteId)) {
+			throw new EntityNotFoundException();
 		}
 		
-		List<Consulta> consultas = consultaRepository.consultasFinalizadasDoMedico(medicoId);
+		Page<ConsultaListagemDTO> page;
 		
-		List<ConsultaListagemDTO> dtos = consultas.stream().map(ConsultaListagemDTO::new).toList();
-		
-		return dtos;
-	}
-	
-	public List<ConsultaListagemDTO> listarConsultasFinalizadasDoPaciente(Long pacienteId) {
-		if (!pacienteRepository.existsById(pacienteId)) {
-			throw new EntityNotFoundException("Paciente não encontrado");
+		if (medicoId != null && pacienteId != null) {
+			throw new ValidacaoConsultaException("Apenas um parâmetro deve ser passado");
+		} else if (medicoId != null) {
+			page = consultaRepository.consultasAgendadasDoMedico(medicoId, agora(), pageable);
+		} else if (pacienteId != null) {
+			page = consultaRepository.consultasAgendadasDoPaciente(pacienteId, agora(), pageable);
+		} else {
+			throw new ValidacaoConsultaException("Um parâmetro precisa ser passado");
 		}
 		
-		List<Consulta> consultas = consultaRepository.consultasFinalizadasDoPaciente(pacienteId);
+		return page;
+	}
+	
+	public Page<ConsultaListagemDTO> listarConsultasFinalizadas(Pageable pageable) {
+		Page<ConsultaListagemDTO> page = consultaRepository.consultasFinalizadas(pageable);
 		
-		List<ConsultaListagemDTO> dtos = consultas.stream().map(ConsultaListagemDTO::new).toList();
+		return page;
+	}
+	
+	public Page<ConsultaListagemDTO> listarConsultasFinalizadas(Long medicoId, Long pacienteId, Pageable pageable) {
+		if (medicoId != null && !medicoRepository.existsById(medicoId)) {
+			throw new EntityNotFoundException();
+		}
 		
-		return dtos;
+		if (pacienteId != null && !pacienteRepository.existsById(pacienteId)) {
+			throw new EntityNotFoundException();
+		}
+		
+		Page<ConsultaListagemDTO> page;
+		
+		if (medicoId != null && pacienteId != null) {
+			throw new ValidacaoConsultaException("Apenas um parâmetro deve ser passado");
+		} else if (medicoId != null) {
+			page = consultaRepository.consultasFinalizadasDoMedico(medicoId, pageable);
+		} else if (pacienteId != null) {
+			page = consultaRepository.consultasFinalizadasDoPaciente(pacienteId, pageable);
+		} else {
+			throw new ValidacaoConsultaException("Um parâmetro precisa ser passado");
+		}
+		
+		return page;
 	}
 	
 	public CancelamentoDetalhamentoDTO detalharCancelamento(Long id) {
@@ -182,44 +214,34 @@ public class ConsultaService {
 		return new CancelamentoDetalhamentoDTO(cancelamento);
 	}
 	
-	public List<CancelamentoListagemDTO> listarCancelamentos() {
-		List<Cancelamento> cancelamentos = cancelamentoRepository.findAll();
+	public Page<CancelamentoListagemDTO> listarCancelamentos(Pageable pageable) {
+		Page<CancelamentoListagemDTO> page = cancelamentoRepository.findAll(pageable).map(CancelamentoListagemDTO::new);
 		
-		List<CancelamentoListagemDTO> dtos = cancelamentos.stream().map(CancelamentoListagemDTO::new).toList();
-		
-		return dtos;
+		return page;
 	}
 	
-	public List<CancelamentoListagemDTO> listarCancelamentosDoMedico(Long medicoId) {
-		if (!medicoRepository.existsById(medicoId)) {
-			throw new EntityNotFoundException("Médico não encontrado");
+	public Page<CancelamentoListagemDTO> listarCancelamentos(Long medicoId, Long pacienteId, Pageable pageable) {
+		if (medicoId != null && !medicoRepository.existsById(medicoId)) {
+			throw new EntityNotFoundException();
 		}
 		
-		List<Cancelamento> cancelamentos = cancelamentoRepository.cancelamentosDoMedico(medicoId);
-		
-		List<CancelamentoListagemDTO> dtos = cancelamentos.stream().map(CancelamentoListagemDTO::new).toList();
-		
-		return dtos;
-	}
-	
-	public List<CancelamentoListagemDTO> listarCancelamentosDoPaciente(Long pacienteId) {
-		if (!pacienteRepository.existsById(pacienteId)) {
-			throw new EntityNotFoundException("Paciente não encontrado");
+		if (pacienteId != null && !pacienteRepository.existsById(pacienteId)) {
+			throw new EntityNotFoundException();
 		}
 		
-		List<Cancelamento> cancelamentos = cancelamentoRepository.cancelamentosDoPaciente(pacienteId);
+		Page<CancelamentoListagemDTO> page;
 		
-		List<CancelamentoListagemDTO> dtos = cancelamentos.stream().map(CancelamentoListagemDTO::new).toList();
+		if (medicoId != null && pacienteId != null) {
+			throw new ValidacaoConsultaException("Apenas um parâmetro deve ser passado");
+		} else if (medicoId != null) {
+			page = cancelamentoRepository.cancelamentosDoMedico(medicoId, pageable);
+		} else if (pacienteId != null) {
+			page = cancelamentoRepository.cancelamentosDoPaciente(pacienteId, pageable);
+		} else {
+			throw new ValidacaoConsultaException("Um parâmetro precisa ser passado");
+		}
 		
-		return dtos;
-	}
-	
-	public List<CancelamentoListagemDTO> listarCancelamentosPorEspecialidade(Especialidade especialidade) {
-		List<Cancelamento> cancelamentos = cancelamentoRepository.cancelamentosPorEspecialidade(especialidade);
-		
-		List<CancelamentoListagemDTO> dtos = cancelamentos.stream().map(CancelamentoListagemDTO::new).toList();
-		
-		return dtos;
+		return page;
 	}
 	
 	private LocalDateTime agora() {

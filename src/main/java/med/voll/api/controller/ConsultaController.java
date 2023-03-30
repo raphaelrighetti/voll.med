@@ -1,9 +1,10 @@
 package med.voll.api.controller;
 
 import java.net.URI;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -22,6 +24,7 @@ import med.voll.api.domain.consulta.cancelamento.dto.CancelamentoDTO;
 import med.voll.api.domain.consulta.cancelamento.dto.CancelamentoDetalhamentoDTO;
 import med.voll.api.domain.consulta.cancelamento.dto.CancelamentoListagemDTO;
 import med.voll.api.domain.consulta.dto.ConsultaListagemDTO;
+import med.voll.api.domain.consulta.dto.ConsultasDisponiveisNoDiaDTO;
 import med.voll.api.domain.medico.Especialidade;
 import med.voll.api.domain.consulta.dto.ConsultaAgendamentoDTO;
 import med.voll.api.domain.consulta.dto.ConsultaDetalhamentoDTO;
@@ -64,66 +67,53 @@ public class ConsultaController {
 	
 	@GetMapping("/disponivel")
 	@SecurityRequirement(name = "bearer-key")
-	public ResponseEntity<List<ConsultaDisponivelListagemDTO>> listarConsultasDisponiveis() {
-		List<ConsultaDisponivelListagemDTO> dtos = service.listarConsultasDisponiveis();
+	public ResponseEntity<Page<ConsultaDisponivelListagemDTO>> listarConsultasDisponiveis(Pageable pageable) {
+		Page<ConsultaDisponivelListagemDTO> page = service.listarConsultasDisponiveis(pageable);
 		
-		return ResponseEntity.ok(dtos);
+		return ResponseEntity.ok(page);
 	}
 	
-	@GetMapping("/disponivel/medico/{medicoId}")
+	@GetMapping("/disponivel/dia")
 	@SecurityRequirement(name = "bearer-key")
-	public ResponseEntity<List<ConsultaDisponivelListagemDTO>> listarConsultasDisponiveisDoMedico(@PathVariable Long medicoId) {
-		List<ConsultaDisponivelListagemDTO> dtos = service.listarConsultasDisponiveisDoMedico(medicoId);
+	public ResponseEntity<Page<ConsultasDisponiveisNoDiaDTO>> listarConsultasDisponiveis(
+			@RequestParam(required = false, name = "medico") Long medicoId, @RequestParam(required = false) Especialidade especialidade, Pageable pageable) {
+		Page<ConsultasDisponiveisNoDiaDTO> page = service.listarConsultasDisponiveis(medicoId, especialidade, pageable);
 		
-		return ResponseEntity.ok(dtos);
+		return ResponseEntity.ok(page);
 	}
 	
 	@GetMapping("/agendada")
 	@SecurityRequirement(name = "bearer-key")
-	public ResponseEntity<List<ConsultaListagemDTO>> listarConsultasAgendadas() {
-		List<ConsultaListagemDTO> dtos = service.listarConsultasAgendadas();
+	public ResponseEntity<Page<ConsultaListagemDTO>> listarConsultasAgendadas(Pageable pageable) {
+		Page<ConsultaListagemDTO> page = service.listarConsultasAgendadas(pageable);
 		
-		return ResponseEntity.ok(dtos);
+		return ResponseEntity.ok(page);
 	}
 	
-	@GetMapping("/agendada/medico/{medicoId}")
+	@GetMapping("/agendada/params")
 	@SecurityRequirement(name = "bearer-key")
-	public ResponseEntity<List<ConsultaListagemDTO>> listarConsultasAgendadasDoMedico(@PathVariable Long medicoId) {
-		List<ConsultaListagemDTO> dtos = service.listarConsultasAgendadasDoMedico(medicoId);
+	public ResponseEntity<Page<ConsultaListagemDTO>> listarConsultasAgendadas(
+			@RequestParam(required = false, name = "medico") Long medicoId, @RequestParam(required = false, name = "paciente") Long pacienteId, Pageable pageable) {
+		Page<ConsultaListagemDTO> page = service.listarConsultasAgendadas(medicoId, pacienteId, pageable);
 		
-		return ResponseEntity.ok(dtos);
-	}
-	
-	@GetMapping("/agendada/paciente/{pacienteId}")
-	@SecurityRequirement(name = "bearer-key")
-	public ResponseEntity<List<ConsultaListagemDTO>> listarConsultasAgendadasDoPaciente(@PathVariable Long pacienteId) {
-		List<ConsultaListagemDTO> dtos = service.listarConsultasAgendadasDoPaciente(pacienteId);
-		
-		return ResponseEntity.ok(dtos);
+		return ResponseEntity.ok(page);
 	}
 	
 	@GetMapping("/finalizada")
 	@SecurityRequirement(name = "bearer-key")
-	public ResponseEntity<List<ConsultaListagemDTO>> listarConsultasFinalizadas() {
-		List<ConsultaListagemDTO> dtos = service.listarConsultasFinalizadas();
+	public ResponseEntity<Page<ConsultaListagemDTO>> listarConsultasFinalizadas(Pageable pageable) {
+		Page<ConsultaListagemDTO> page = service.listarConsultasFinalizadas(pageable);
 		
-		return ResponseEntity.ok(dtos);
+		return ResponseEntity.ok(page);
 	}
 	
-	@GetMapping("/finalizada/medico/{medicoId}")
+	@GetMapping("/finalizada/params")
 	@SecurityRequirement(name = "bearer-key")
-	public ResponseEntity<List<ConsultaListagemDTO>> listarConsultasFinalizadasDoMedico(@PathVariable Long medicoId) {
-		List<ConsultaListagemDTO> dtos = service.listarConsultasFinalizadasDoMedico(medicoId);
+	public ResponseEntity<Page<ConsultaListagemDTO>> listarConsultasFinzalizadas(
+			@RequestParam(required = false, name = "medico") Long medicoId, @RequestParam(required = false, name = "paciente") Long pacienteId, Pageable pageable) {
+		Page<ConsultaListagemDTO> page = service.listarConsultasFinalizadas(medicoId, pacienteId, pageable);
 		
-		return ResponseEntity.ok(dtos);
-	}
-	
-	@GetMapping("/finalizada/paciente/{pacienteId}")
-	@SecurityRequirement(name = "bearer-key")
-	public ResponseEntity<List<ConsultaListagemDTO>> listarConsultasFinalizadasDoPaciente(@PathVariable Long pacienteId) {
-		List<ConsultaListagemDTO> dtos = service.listarConsultasFinalizadasDoPaciente(pacienteId);
-		
-		return ResponseEntity.ok(dtos);
+		return ResponseEntity.ok(page);
 	}
 	
 	@GetMapping("/cancelada/{id}")
@@ -136,33 +126,18 @@ public class ConsultaController {
 	
 	@GetMapping("/cancelada")
 	@SecurityRequirement(name = "bearer-key")
-	public ResponseEntity<List<CancelamentoListagemDTO>> listarCancelamentos() {
-		List<CancelamentoListagemDTO> dtos = service.listarCancelamentos();
+	public ResponseEntity<Page<CancelamentoListagemDTO>> listarCancelamentos(Pageable pageable) {
+		Page<CancelamentoListagemDTO> page = service.listarCancelamentos(pageable);
 		
-		return ResponseEntity.ok(dtos);
+		return ResponseEntity.ok(page);
 	}
 	
-	@GetMapping("/cancelada/medico/{medicoId}")
+	@GetMapping("/cancelada/params")
 	@SecurityRequirement(name = "bearer-key")
-	public ResponseEntity<List<CancelamentoListagemDTO>> listarCancelamentosDoMedico(@PathVariable Long medicoId) {
-		List<CancelamentoListagemDTO> dtos = service.listarCancelamentosDoMedico(medicoId);
+	public ResponseEntity<Page<CancelamentoListagemDTO>> listarCancelamentos(
+			@RequestParam(required = false, name = "medico") Long medicoId, @RequestParam(required = false, name = "paciente") Long pacienteId, Pageable pageable) {
+		Page<CancelamentoListagemDTO> page = service.listarCancelamentos(medicoId, pacienteId, pageable);
 		
-		return ResponseEntity.ok(dtos);
-	}
-	
-	@GetMapping("/cancelada/paciente/{pacienteId}")
-	@SecurityRequirement(name = "bearer-key")
-	public ResponseEntity<List<CancelamentoListagemDTO>> listarCancelamentosDoPaciente(@PathVariable Long pacienteId) {
-		List<CancelamentoListagemDTO> dtos = service.listarCancelamentosDoPaciente(pacienteId);
-		
-		return ResponseEntity.ok(dtos);
-	}
-	
-	@GetMapping("/cancelada/especialidade/{especialidade}")
-	@SecurityRequirement(name = "bearer-key")
-	public ResponseEntity<List<CancelamentoListagemDTO>> listarCancelamentosPorEspecialidade(@PathVariable Especialidade especialidade) {
-		List<CancelamentoListagemDTO> dtos = service.listarCancelamentosPorEspecialidade(especialidade);
-		
-		return ResponseEntity.ok(dtos);
+		return ResponseEntity.ok(page);
 	}
 }

@@ -17,6 +17,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import med.voll.api.domain.consulta.dia.Dia;
 import med.voll.api.domain.medico.Medico;
 import med.voll.api.domain.paciente.Paciente;
 
@@ -40,6 +41,10 @@ public class Consulta {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "paciente_id")
 	private Paciente paciente;
+	
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "dia_consulta_id")
+	private Dia dia;
 	
 	private LocalDateTime data;
 	
